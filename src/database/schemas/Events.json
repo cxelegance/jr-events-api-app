@@ -1,0 +1,88 @@
+"id": {
+	"type": {
+		"type": "String",
+		"isRequired": true,
+		"oneOf": ["concert", "festival", "special set", "gig", "house concert"],
+		"default": "concert"
+	},
+	"uri": {
+		"type": "String",
+		"note": "external link to the event, such as the Songkick page"
+	},
+	"name": {
+		"type": "String",
+		"isRequired": true,
+		"note": "the name of the <type>, e.g., Live set - Quintal Brunch with JR"
+	},
+	"description": {
+		"type": "String",
+		"note": "e.g., Guest to Billie Woods' show"
+	},
+	"startTime": {
+		"type": "Number",
+		"isRequired": true,
+		"note": "milliseconds since the Unix Epoch."
+	},
+	"duration": {
+		"type": "Number",
+		"note": "milliseconds that can be added to startDate"
+	},
+	"timezone": {
+		"type": "String",
+		"isRequired": true,
+		"default": "Etc/UTC",
+		"note": "e.g. America/New_York, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+	},
+	"songkick": {
+		"type": "Object",
+		"object": {
+			"id": {
+				"type": "String"
+				"note": "TODO need to find out the schema/JSON structure from them"
+			},
+			"venue": {
+				"type": "Object",
+				"object": {
+
+				}
+			}
+		}
+	},
+	"altVenue": {
+		"note": "useful if there is no songkick venue; e.g., The Church, Nanda's house, etc.",
+		"type": "Object",
+		"object": {
+			"displayName": {
+				"type": "String",
+				"note": "e.g., The Fillmore"
+			},
+			"city": {
+				"type": "String",
+				"note": "e.g., San Francisco"
+			},
+			"state": {
+				"type": "String",
+				"note": "e.g., CA, California, Wellington, etc."
+			},
+			"country": {
+				"type": "String",
+				"note": "two letters: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2"
+			}
+		}
+	},
+	"misc": {
+		"type": "Object",
+		"object": {
+			"otherActs": {
+				"type": "Array",
+				"subType": "String",
+				"note": "E.g., [Brasilia Sax, Duo Alvenaria, etc.]"
+			},
+			"musicianNames": {
+				"type": "Array",
+				"subType": "String",
+				"note": "E.g., [Du Andrade, Tynan Groves, etc.]"
+			}
+		}
+	}
+}

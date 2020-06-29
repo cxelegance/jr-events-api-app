@@ -8,8 +8,9 @@
 		"babel-polyfill": "6.26.0",
 		"babel-preset-env": "1.5.2",
 		"babel-preset-react": "6.24.1",
+		"bunyan": "1.8.12",
 		"css-loader": "0.28.4",
-		"express": "4.15.4",
+		"express": "4.17.1",
 		"extract-text-webpack-plugin": "3.0.0",
 		"firebase": "4.2.0",
 		"history": "4.7.2",
@@ -30,6 +31,7 @@
 		"redux-mock-store": "1.2.3",
 		"redux-thunk": "2.2.0",
 		"sass-loader": "6.0.6",
+		"simple-json-db": "1.2.2",
 		"style-loader": "0.18.2",
 		"validator": "8.0.0",
 		"webpack": "3.1.0"
@@ -62,7 +64,9 @@
 		"test": "cross-env NODE_ENV=test jest --config=jest.config.json",
 		"test-watch": "cross-env NODE_ENV=test jest --watch --config=jest.config.json",
 		"heroku-postbuild": "yarn run build:prod",
-		"clean": "bash ./cleanup.sh"
+		"clean": "bash ./cleanup.sh",
+		"build-babel-server": "babel src/server --out-dir server/ --presets=env --plugins=transform-class-properties",
+		"build-babel-models": "babel src/database/models --out-dir database/models/ --presets=env --plugins=transform-class-properties"
 	},
 	"engines": {
 		"node": "10.x",
