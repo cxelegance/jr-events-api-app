@@ -1,14 +1,11 @@
-const path = require('path');
-import simpleJSONDB from 'simple-json-db';
-
-const dbPath = path.join(__dirname, '..', 'jsonDB/Events.json');
-const db = new simpleJSONDB(dbPath, {asyncWrite: true});
+import logger from '../../server/logger';
+import '../../server/load-env.js';
+import db from '../connect-db';
 
 /*
- * TODO
- *    - all throws should be an exception type
  *    - database indices are positive, non zero integers wrapped in strings
  *    - methods always return empty array or array of one or more events of the form {id, event}
+ *    - throws: TypeError for bad params
  */
 
 class EventsModel {
@@ -16,8 +13,9 @@ class EventsModel {
 	#bottomID;
 	#topID;
 
-	constructor(schemaJSON) {
-		this.schema = JSON.parse(schemaJSON);
+	constructor(schema) {
+		this.schema = schema;
+		if(typeof schema != 'object' || schema === null) throw new TypeError('constructor expects schema to be a non-null object');
 		this.#determineRange();
 	}
 
@@ -34,23 +32,28 @@ class EventsModel {
 	//    if you want the top/newest event, then send a falsy value as startDI and a truthy endID
 	read = (startID, endID) => {
 		let events;
-		if(typeof startID == 'number' && typeof endID == 'number'){
-			if(startID == endID){
+		if(!!!startID && !!!endID){ // two falsy values
+			events = this.#readRange(this.#bottomID + '', this.#topID);
+			logger.info(`read: all events, from ID ${this.#bottomID} to ID ${this.#topID}`);
+		}else if(!!startID && !!!endID){ // one truthy followed by one falsy value
+			events = this.#readOne(this.#bottomID + '');
+			logger.info(`read: bottom event, ID ${this.#bottomID}`);
+		}else if(!!!startID && !!endID){ // one falsy followed by one truthy value
+			events = this.#readOne(this.#topID + '');
+			logger.info(`read: top event, ID ${this.#topID}`);
+		}else{ // two truthy values
+			if(typeof startID != 'number' || typeof endID != 'number'){
+				throw new TypeError('when sending two truthy values, ensure they are both numbers');
+			}
+			if(startID >= endID){
 				events = this.#readOne(startID + '');
-			}else if(startID > endID){
-				throw 'startID should be <= endID';
+				logger.info(`read: one event, ID: ${startID}`);
 			}else{
 				events = this.#readRange(startID + '', endID + '');
+				logger.info(`read: range events, from ID ${startID} to ID ${endID}`);
 			}
-		}else if(!!startID && !!endID){
-			events = this.#readRange(this.#bottomID + '', this.#topID);
-		}else if(!!startID && !!!endID){
-			events = this.#readOne(this.#bottomID + '');
-		}else if(!!!startID && !!endID){
-			events = this.#readOne(this.#topID + '');
-		}else {
-			throw 'incorrect parameters sent';
 		}
+
 		return events;
 	};
 
@@ -63,9 +66,11 @@ class EventsModel {
 	};
 
 	#readOne = (id) => {
+		logger.info(`readOne: ${id}`);
 		const event = db.get(id);
+		logger.info(`readOne: ${event}`);
 		if(!event) return [];
-		return [{id, event}];
+		else return [{id, event}];
 	}
 
 	#readRange = (bottom, top) => {
@@ -73,12 +78,15 @@ class EventsModel {
 	}
 
 	#determineRange = () => {
-		const db = db.JSON();
-		const indices = Object.keys(db);
+		const dbCopy = db.JSON();
+		const indices = Object.keys(dbCopy);
+		logger.info(`determineRange: indices length: ${indices.length}`);
 		if(indices.length){
 			this.#bottomID = parseInt(indices[0], 10);
-			this.#topID = parseInt(indices[indices.length - 1]);
+			this.#topID = parseInt(indices[indices.length - 1], 10);
 		}
+		logger.info(`determineRange: bottomID: ${this.#bottomID}`);
+		logger.info(`determineRange: topID: ${this.#topID}`);
 	}
 }
 

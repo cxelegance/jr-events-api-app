@@ -1,5 +1,7 @@
 .DS_Store
-node_modules/
-public/dist/
-.env.test
-.env.development
+/node_modules/
+/public/dist/
+/.env.test
+/.env.development
+/database/
+/server/

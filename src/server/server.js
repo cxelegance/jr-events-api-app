@@ -1,6 +1,7 @@
 const path = require('path');
 import express from 'express';
 
+import './load-env.js';
 import apiEventsRouter from './routers/APIEventsRouter';
 import apiEventRouter from './routers/APIEventRouter';
 import apiRouter from './routers/APIRouter';
@@ -9,7 +10,7 @@ import logger from './logger';
 
 const app = express();
 const publicPath = path.join(__dirname, '..', 'public/');
-const port = 3000; // 3000 is available on all OS
+const port = process.env.PORT; // 3000 is available on all OS
 
 app.use(express.json());
 

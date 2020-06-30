@@ -2,3 +2,5 @@
 
 rm -fR ./node_modules/
 rm -fR ./public/dist/
+rm -fR ./database/
+rm -fR ./server/
