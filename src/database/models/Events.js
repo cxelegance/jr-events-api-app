@@ -1,5 +1,3 @@
-import logger from '../../server/logger';
-import '../../server/load-env.js';
 import db from '../connect-db';
 
 /*
@@ -34,23 +32,23 @@ class EventsModel {
 		let events;
 		if(!!!startID && !!!endID){ // two falsy values
 			events = this.#readRange(this.#bottomID + '', this.#topID);
-			logger.info(`read: all events, from ID ${this.#bottomID} to ID ${this.#topID}`);
+			console.log(`read: all events, from ID ${this.#bottomID} to ID ${this.#topID}`);
 		}else if(!!startID && !!!endID){ // one truthy followed by one falsy value
 			events = this.#readOne(this.#bottomID + '');
-			logger.info(`read: bottom event, ID ${this.#bottomID}`);
+			console.log(`read: bottom event, ID ${this.#bottomID}`);
 		}else if(!!!startID && !!endID){ // one falsy followed by one truthy value
 			events = this.#readOne(this.#topID + '');
-			logger.info(`read: top event, ID ${this.#topID}`);
+			console.log(`read: top event, ID ${this.#topID}`);
 		}else{ // two truthy values
 			if(typeof startID != 'number' || typeof endID != 'number'){
 				throw new TypeError('when sending two truthy values, ensure they are both numbers');
 			}
 			if(startID >= endID){
 				events = this.#readOne(startID + '');
-				logger.info(`read: one event, ID: ${startID}`);
+				console.log(`read: one event, ID: ${startID}`);
 			}else{
 				events = this.#readRange(startID + '', endID + '');
-				logger.info(`read: range events, from ID ${startID} to ID ${endID}`);
+				console.log(`read: range events, from ID ${startID} to ID ${endID}`);
 			}
 		}
 
@@ -66,9 +64,9 @@ class EventsModel {
 	};
 
 	#readOne = (id) => {
-		logger.info(`readOne: ${id}`);
+		console.log(`readOne: ${id}`);
 		const event = db.get(id);
-		logger.info(`readOne: ${event}`);
+		console.log(`readOne: ${event}`);
 		if(!event) return [];
 		else return [{id, event}];
 	}
@@ -80,13 +78,13 @@ class EventsModel {
 	#determineRange = () => {
 		const dbCopy = db.JSON();
 		const indices = Object.keys(dbCopy);
-		logger.info(`determineRange: indices length: ${indices.length}`);
+		console.log(`determineRange: indices length: ${indices.length}`);
 		if(indices.length){
 			this.#bottomID = parseInt(indices[0], 10);
 			this.#topID = parseInt(indices[indices.length - 1], 10);
 		}
-		logger.info(`determineRange: bottomID: ${this.#bottomID}`);
-		logger.info(`determineRange: topID: ${this.#topID}`);
+		console.log(`determineRange: bottomID: ${this.#bottomID}`);
+		console.log(`determineRange: topID: ${this.#topID}`);
 	}
 }
 
