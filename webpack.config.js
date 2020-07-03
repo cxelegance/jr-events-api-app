@@ -22,7 +22,7 @@ module.exports = (env) => {
 	return {
 		//essentials
 		//   https://webpack.js.org/concepts/#entry
-		entry: ['babel-polyfill', './src/app.js'],
+		entry: ['@babel/polyfill', './src/app.js'],
 		output: {
 			path: path.resolve(__dirname, 'public', 'dist'),
 			filename: 'bundle.js' // common filename for webpack-generated output

@@ -1,6 +1,6 @@
 import express from 'express';
 
-import '../load-env.js';
+import '../../env/load-env.js';
 import logger from '../logger';
 import EventsModel from '../../database/models/Events';
 import eventsSchema from '../../database/schemas/Events.json';
