@@ -3,7 +3,7 @@
 		"type": "String",
 		"isRequired": true,
 		"oneOf": ["concert", "festival", "special set", "gig", "house concert"],
-		"default": "concert"
+		"defaultVal": "concert"
 	},
 	"uri": {
 		"type": "String",
@@ -25,12 +25,12 @@
 	},
 	"duration": {
 		"type": "Number",
-		"note": "milliseconds that can be added to startDate"
+		"note": "milliseconds that can be added to startTime"
 	},
 	"timezone": {
 		"type": "String",
 		"isRequired": true,
-		"default": "Etc/UTC",
+		"defaultVal": "Etc/UTC",
 		"note": "e.g. America/New_York, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
 	},
 	"songkick": {

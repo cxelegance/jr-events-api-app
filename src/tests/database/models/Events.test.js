@@ -2,6 +2,10 @@ import EventsModel from '../../../database/models/EventsModel';
 import schema from '../../../database/schemas/Events.json';
 
 let eventsModel;
+const expectedDefaults = {
+	timezone: "Etc/UTC",
+	type: "concert"
+};
 
 beforeEach(() => {
 	eventsModel = new EventsModel(schema);
@@ -44,16 +48,24 @@ test('create should throw TypeError on null or non-objects', () => {
 	).toThrowError( new TypeError('provided record should be a non-null object') );
 });
 
-test.only('create should fill out returned object to match schema', () => {
-	const result = eventsModel.create({
-		name: 'test',
-		start: 20
-	});
-	expect(result.length).toBe(1);
-	expect(result).toEqual([{id: 1, event: {name: 'test', start: 20}}]);
-
-	// const result2 = eventsModel.delete(2);
-	// expect(result2).toEqual([]);
+test.only('create should fill out returned object to match schema', (done) => {
+	const event = {name: 'test', startTime: 20, id: 1}
+	eventsModel.create(
+		event
+	).then(
+		result => {
+			expect(result).toEqual([{...event, ...expectedDefaults}]);
+		}
+	).then(
+		() => {
+			eventsModel.delete(1).then(
+				result => {
+					expect(result).toEqual([]);
+				}
+			);
+			done();
+		}
+	);
 });
 
 

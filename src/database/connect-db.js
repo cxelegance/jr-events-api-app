@@ -1,6 +1,6 @@
 const path = require('path');
-import simpleJSONDB from 'simple-json-db';
 
+import simpleJSONDB from './hack-simple-json-db';
 import '../env/load-env.js';
 
 // determine dbPath based on whether or not there is a 'src/' followed by 'database/' in the path
@@ -14,6 +14,6 @@ if(iSrc > -1 && aDirParts.indexOf('database') == iSrc + 1){
 dbPath = path.format(dbPath);
 
 // now connect the db with the correct path
-const db = new simpleJSONDB(dbPath, {asyncWrite: true});
+const db = new simpleJSONDB(dbPath, {asyncWrite: false});
 
 export {db as default};

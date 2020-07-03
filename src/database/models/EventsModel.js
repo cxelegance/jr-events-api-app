@@ -4,32 +4,45 @@ import AbstractModel from './AbstractModel';
 /*
  *    - database indices are positive, non zero integers wrapped in strings
  *    - methods always return empty array or array of one or more events of the form {id, event}
- *    - throws: TypeError for bad params
+ *    - throws: TypeError for bad params, Error for database Errors
  */
 
 class EventsModel extends AbstractModel {
 	#bottomID;
 	#topID;
 	#eventWIP;
+	#idMap;
 
 	constructor(schema) {
 		super(schema);
-		this.#determineRange();
+		this.tableName = 'events';
+		this.#buildIdMap();
 	}
 
 	create = (event) => {
-		if(!this.#topID){
-			this.#topID = 0;
-			this.#bottomID = 1;
-		}
-		const nextID = this.#topID + 1;
-		this.validateObject(event);
-		this.#eventWIP = {...event};
-		this.#fillDefaults(this.#eventWIP, this.schema);
-		// this.#validate(this.#eventWIP, this.schema);
-		db.set(nextID + '', event);
-		this.#topID += 1;
-		return [{id: nextID, event: db.get(nextID)}];
+		let events = db.get(this.tableName) || [];
+		const id = (this.#idMap[this.#idMap.length - 1] || 0) + 1; // event IDs are positive, non-zero integers.
+		this.validateRecord(event);
+		this.#eventWIP = {...event, id};
+		this.fillDefaults(this.#eventWIP, this.schema);
+		// this.#validate(this.#eventWIP, this.schema)
+		event = {...this.#eventWIP};
+		events.push(event);
+		db.set(this.tableName, events);
+		this.#idMap.push(id);
+		return new Promise(
+			(resolve, reject) => {
+				db.sync().then(
+					() => {
+						resolve([event]);
+					}
+				).catch(
+					e => {
+						throw new Error(e);
+					}
+				);
+			}
+		);
 	};
 
 	// always returns an array of objects or an empty array
@@ -73,10 +86,19 @@ class EventsModel extends AbstractModel {
 	// if this throws TypeError or SyntaxError, then there's an issue with the database; see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/delete
 	delete = (id) => {
 		console.log(`delete: ${id}`);
-		if(db.has(id + '') && !db.delete(id + '')){
-			throw new TypeError(`database has ID "${id}" but cannot delete it`);
-		}
-		return [];
+		let events = db.get(this.tableName) || [];
+		const index = this.#idMap.indexOf(id);
+		return new Promise(
+			(resolve, reject) => {
+				if(index > -1){
+					events.splice(index, 1);
+					this.#idMap.splice(index, 1);
+					db.sync().then( () => resolve([]) );
+				}else{
+					resolve( [] );
+				}
+			}
+		);
 	};
 
 	#readOne = (id) => {
@@ -99,16 +121,13 @@ class EventsModel extends AbstractModel {
 		);
 	}
 
-	#determineRange = () => {
-		const dbCopy = db.JSON();
-		const indices = Object.keys(dbCopy);
-		console.log(`determineRange: indices length: ${indices.length}`);
-		if(indices.length){
-			this.#bottomID = parseInt(indices[0], 10);
-			this.#topID = parseInt(indices[indices.length - 1], 10);
-		}
-		console.log(`determineRange: bottomID: ${this.#bottomID}`);
-		console.log(`determineRange: topID: ${this.#topID}`);
+	#buildIdMap = () => {
+		const records = db.get(this.tableName);
+		if(!records) this.#idMap = [];
+		else this.#idMap = records.map(
+			record => record.id
+		);
+		console.log(`idMap: ${this.#idMap}`);
 	}
 
 	#validate = (event, schema) =>{
@@ -129,17 +148,6 @@ class EventsModel extends AbstractModel {
 		}
 	}
 
-	// event param should be a property on a maintained object; thus, by reference, it will be altered
-	#fillDefaults = (event, schema) => {
-		const entries = Object.entries(event);
-		for(const [field, {defaultVal, type}] of Object.entries(event)){
-			if(type === 'Object'){
-				this.#fillDefaults(event[field], schema[field]['object']);
-			}else if (defaultVal && !event[field]){
-				event[field] = defaultVal;
-			}
-		}
-	}
 }
 
 export {EventsModel as default};

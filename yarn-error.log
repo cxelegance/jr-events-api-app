@@ -1,5 +1,5 @@
 Arguments: 
-  /usr/local/bin/node /usr/local/bin/yarn start
+  /usr/local/bin/node /usr/local/bin/yarn add --dev @babel/plugin-tranform-destructuring@7.10.4
 
 PATH: 
   /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/MacGPG2/bin
@@ -14,12 +14,17 @@ Platform:
   darwin x64
 
 Trace: 
-  SyntaxError: /Volumes/Files/Documents/03 computers and technical/01 web projects/20200625 JR performances app actual/package.json: Unexpected token } in JSON at position 2381
-      at JSON.parse (<anonymous>)
-      at /usr/local/lib/node_modules/yarn/lib/cli.js:1625:59
-      at Generator.next (<anonymous>)
-      at step (/usr/local/lib/node_modules/yarn/lib/cli.js:310:30)
-      at /usr/local/lib/node_modules/yarn/lib/cli.js:321:13
+  Error: https://registry.yarnpkg.com/@babel%2fplugin-tranform-destructuring: Not found
+      at Request.params.callback [as _callback] (/usr/local/lib/node_modules/yarn/lib/cli.js:66975:18)
+      at Request.self.callback (/usr/local/lib/node_modules/yarn/lib/cli.js:140727:22)
+      at Request.emit (events.js:198:13)
+      at Request.<anonymous> (/usr/local/lib/node_modules/yarn/lib/cli.js:141699:10)
+      at Request.emit (events.js:198:13)
+      at IncomingMessage.<anonymous> (/usr/local/lib/node_modules/yarn/lib/cli.js:141621:12)
+      at Object.onceWrapper (events.js:286:20)
+      at IncomingMessage.emit (events.js:203:15)
+      at endReadableNT (_stream_readable.js:1145:12)
+      at process._tickCallback (internal/process/next_tick.js:63:19)
 
 npm manifest: 
   {
@@ -91,7 +96,7 @@ npm manifest:
   		"heroku-postbuild": "yarn run build:prod",
   		"clean": "bash ./cleanup.sh",
   		"build-server": "babel src/server --out-dir server/ --presets=@babel/preset-env --plugins=@babel/plugin-proposal-class-properties",
-  		"build-database": "babel src/database --out-dir database/ --presets=@babel/preset-env --plugins=@babel/plugin-proposal-class-properties,@babel/plugin-proposal-private-methods",
+  		"build-database": "babel src/database --out-dir database/ --presets=@babel/preset-env --plugins=@babel/plugin-proposal-class-properties,@babel/plugin-proposal-private-methods"
   	},
   	"engines": {
   		"node": "10.x",
