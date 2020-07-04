@@ -48,7 +48,7 @@ test('create should throw TypeError on null or non-objects', () => {
 	).toThrowError( new TypeError('provided record should be a non-null object') );
 });
 
-test.only('create should fill out returned object to match schema', (done) => {
+test('create should fill out returned object to match schema', (done) => {
 	const event = {name: 'test', startTime: 20, id: 1}
 	eventsModel.create(
 		event
@@ -61,9 +61,145 @@ test.only('create should fill out returned object to match schema', (done) => {
 			eventsModel.delete(1).then(
 				result => {
 					expect(result).toEqual([]);
+					done();
 				}
 			);
-			done();
+		}
+	);
+});
+
+test('create should fill out returned object to match any schema: 1', (done) => {
+	const schema = {
+		"songkick": {
+			"type": "Object",
+			"object": {
+				"id": {
+					"type": "String",
+					"note": "Songkick will have a reference ID so this is required",
+					"isRequired": true
+				},
+				"venue": {
+					"type": "Object",
+					"object": {
+						"id": {
+							"isRequired": true,
+							"type": "String",
+							"note": "Venues have reference IDs as well, make it essential"
+						},
+						"name": {
+							"type": "String"
+						},
+						"timezone": {
+							"defaultVal": "UTC"
+						}
+					},
+					"isRequired": true
+				},
+				"location": {
+					"defaultVal": "USA"
+				}
+			}
+		}
+	};
+
+	const eventGiven = {
+		id: 1
+	};
+	const eventReceived = {
+		id: 1
+	};
+	eventsModel = new EventsModel(schema);
+
+	eventsModel.create(
+		eventGiven
+	).then(
+		result => {
+			expect(result).toEqual([eventReceived]);
+		}
+	).then(
+		() => {
+			eventsModel.delete(1).then(
+				result => {
+					expect(result).toEqual([]);
+					done();
+				}
+			);
+		}
+	);
+});
+
+test('create should fill out returned object to match any schema: 2', (done) => {
+	const schema = {
+		"songkick": {
+			"type": "Object",
+			"object": {
+				"id": {
+					"type": "String",
+					"note": "Songkick will have a reference ID so this is required",
+					"isRequired": true
+				},
+				"venue": {
+					"type": "Object",
+					"object": {
+						"id": {
+							"isRequired": true,
+							"type": "String",
+							"note": "Venues have reference IDs as well, make it essential"
+						},
+						"name": {
+							"type": "String"
+						},
+						"timezone": {
+							"defaultVal": "UTC"
+						}
+					},
+					"isRequired": true
+				},
+				"location": {
+					"defaultVal": "USA"
+				}
+			}
+		}
+	};
+
+	const eventGiven = {
+		id: 1,
+		songkick: {
+			id: 'asdfa',
+			venue: {
+				id: '43256g',
+				name: 'my place'
+			}
+		}
+	};
+	const eventReceived = {
+		id: 1,
+		songkick: {
+			id: 'asdfa',
+			venue: {
+				id: '43256g',
+				name: 'my place',
+				timezone: 'UTC'
+			},
+			location: 'USA'
+		}
+	};
+	eventsModel = new EventsModel(schema);
+
+	eventsModel.create(
+		eventGiven
+	).then(
+		result => {
+			expect(result).toEqual([eventReceived]);
+		}
+	).then(
+		() => {
+			eventsModel.delete(1).then(
+				result => {
+					expect(result).toEqual([]);
+					done();
+				}
+			);
 		}
 	);
 });
