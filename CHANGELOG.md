@@ -6,8 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 It is maintained in [Markdown](https://www.markdownguide.org/).
 
 ## [Unreleased]
-- implment CORS for Express
+- implement (or ensure implemented) CORS for Express
+- POST /events/ accepts array of multiple records
+- POST or other method to replace all records with array of records
+
 
 ## [0.1.0] - 2021-03-19
 ### Added
-- message here
+- the API is working; it begins!
+
+## [0.1.1] - 2021-03-19
+### Changed
+- CHANGELOG, LICENSE, and README updated

@@ -1,1 +1,1 @@
-go with a GNU one, not MIT
+The Unlicense
