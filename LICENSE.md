@@ -1,0 +1,1 @@
+go with a GNU one, not MIT

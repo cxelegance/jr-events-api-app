@@ -1,7 +1,9 @@
 .DS_Store
 /node_modules/
 /public/dist/
-/.env.test
-/.env.development
+/.env
 /database/
 /server/
+/src/server/lib/Hashword.js
+/sandbox/
+/src/server/planning/songkickResults.json
