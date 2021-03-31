@@ -69,6 +69,8 @@ export default class Service {
 	 *
 	 * @see allMethods
 	 *
+	 * @param {Object} params Params that were sent as part of the service request.
+	 *
 	 * @return {Promise} The promise resolves with a SuccessServiceResponse with an 'options' property.
 	 */
 	options(params){

@@ -13,8 +13,8 @@ export default class Route {
 
 	/**
 	 * [constructor description]
-	 * @param {[type]} match               For setting the internal property of the same name.
-	 * @param {[type]} [serviceRoute=null] For setting the internal property of the same name.
+	 * @param {Object} match               For setting the internal property of the same name.
+	 * @param {String} [serviceRoute=null] For setting the internal property of the same name.
 	 */
 	constructor(match, serviceRoute = null){
 		this.match = match;

@@ -9,12 +9,21 @@ It is maintained in [Markdown](https://www.markdownguide.org/).
 - implement (or ensure implemented) CORS for Express
 - POST /events/ accepts array of multiple records
 - POST or other method to replace all records with array of records
+- remove authToken from Controller::handleRequest()
 
-
-## [0.1.0] - 2021-03-19
+## [0.2.0] - 2021-03-31
 ### Added
-- the API is working; it begins!
+- handle bad routes on the /api/ root route
+- implemented a Route class for defining routes
+
+### Changed
+- updated planning diagrams to reflect changes in previous versions
+- update some JSDoc
 
 ## [0.1.1] - 2021-03-19
 ### Changed
 - CHANGELOG, LICENSE, and README updated
+
+## [0.1.0] - 2021-03-19
+### Added
+- the API is working; it begins!

@@ -23,17 +23,22 @@ import {authRecsValid} from './fixtures/authRecords';
 import {eventRecsValid} from './fixtures/eventRecords';
 import {Server} from 'http';
 import {saltAndHash} from '../lib/Hashword';
+import Route from '../routes/Route';
 
 const freshLimit = 5 * 60 * 1000; // 5 minutes
 const masterUserID = 100;
 const masterClearword = 'hey just testing';
-const routes = [
-	{match: /^\/api\/events/, serviceRoute: 'Events'},
-	{match: /^\/api\/event\/(?<id>\d+)$/m, serviceRoute: 'Event'},
-	{match: /^\/api\/event/, serviceRoute: 'Event'},
-	{match: /^\/api\/auth/, serviceRoute: 'Auth'}
-];
 const port = 3000;
+
+// Order from top to bottom: first match to last
+const routes = [
+	new Route(/^\/api\/events\/?$/i, 'Events'),
+	new Route(/^\/api\/event\/(?<id>[^\/]+?)\/?$/i, 'Event'),
+	new Route(/^\/api\/event\/?$/i, 'Event'),
+	new Route(/^\/api\/auth\/(?<id>[^\/]+?)\/?$/i, 'Auth'),
+	new Route(/^\/api\/auth\/?$/i, 'Auth'),
+	new Route(/^\/api\/?/i, undefined) // discoverability on bad route
+];
 
 let serviceFactory, serviceToAPIResponseMap, controllerFactory, httpServer, server, baseURI;
 
@@ -45,6 +50,7 @@ beforeEach(() => {
 			controllerFactory = new ControllerFactory(serviceFactory, serviceToAPIResponseMap);
 			if(!(controllerFactory instanceof ControllerFactory)) throw new Error('bad controllerFactory');
 			httpServer = new HTTPServer(port, routes, controllerFactory);
+			// httpServer.log.level('trace');
 		}
 	).then(
 		() => httpServer.listen()
@@ -1567,6 +1573,142 @@ describe('HTTPServer returns all expected APIResponses for /api/event', () => {
 			'json', 'links', Joi.any()
 		).expectNot(
 			'json', 'message', Joi.any()
+		).expectNot(
+			'json', 'data', Joi.any()
+		);
+	});
+
+});
+
+describe('HTTPServer replies with discoverability for unknown routes', () => {
+
+	test('GET returns 404 Not Found for /api/', () => {
+		return frisby.get(`${baseURI}/api/`).expect(
+			'header', 'URI', '/api/'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 404
+		).expect(
+			'json', 'code', 404
+		).expect(
+			'json', 'status', 'Not Found'
+		).expectNot(
+			'header', 'Allow', Joi.any()
+		).expect(
+			'json', 'links', ['event/1', 'events/', 'auth/']
+		).expect(
+			'json', 'message', `NoRouteFoundError: Please see the links property to learn which routes are available.`
+		).expectNot(
+			'json', 'data', Joi.any()
+		);
+	});
+
+	test('PUT returns 404 Not Found for /api/', () => {
+		return frisby.put(`${baseURI}/api/`).expect(
+			'header', 'URI', '/api/'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 404
+		).expect(
+			'json', 'code', 404
+		).expect(
+			'json', 'status', 'Not Found'
+		).expectNot(
+			'header', 'Allow', Joi.any()
+		).expect(
+			'json', 'links', ['event/1', 'events/', 'auth/']
+		).expect(
+			'json', 'message', `NoRouteFoundError: Please see the links property to learn which routes are available.`
+		).expectNot(
+			'json', 'data', Joi.any()
+		);
+	});
+
+	test('OPTIONS returns 404 Not Found for /api/', () => {
+		return frisby.options(`${baseURI}/api/`).expect(
+			'header', 'URI', '/api/'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 404
+		).expect(
+			'json', 'code', 404
+		).expect(
+			'json', 'status', 'Not Found'
+		).expectNot(
+			'header', 'Allow', Joi.any()
+		).expect(
+			'json', 'links', ['event/1', 'events/', 'auth/']
+		).expect(
+			'json', 'message', `NoRouteFoundError: Please see the links property to learn which routes are available.`
+		).expectNot(
+			'json', 'data', Joi.any()
+		);
+	});
+
+	test('GET returns 404 Not Found for /api with no trailing forward slash', () => {
+		return frisby.get(`${baseURI}/api`).expect(
+			'header', 'URI', '/api/'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 404
+		).expect(
+			'json', 'code', 404
+		).expect(
+			'json', 'status', 'Not Found'
+		).expectNot(
+			'header', 'Allow', Joi.any()
+		).expect(
+			'json', 'links', ['event/1', 'events/', 'auth/']
+		).expect(
+			'json', 'message', `NoRouteFoundError: Please see the links property to learn which routes are available.`
+		).expectNot(
+			'json', 'data', Joi.any()
+		);
+	});
+
+	test('GET returns 404 Not Found for /apia', () => {
+		return frisby.get(`${baseURI}/api/`).expect(
+			'header', 'URI', '/api/'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 404
+		).expect(
+			'json', 'code', 404
+		).expect(
+			'json', 'status', 'Not Found'
+		).expectNot(
+			'header', 'Allow', Joi.any()
+		).expect(
+			'json', 'links', ['event/1', 'events/', 'auth/']
+		).expect(
+			'json', 'message', `NoRouteFoundError: Please see the links property to learn which routes are available.`
+		).expectNot(
+			'json', 'data', Joi.any()
+		);
+	});
+
+	test('OPTIONS returns 404 Not Found for /api/a', () => {
+		return frisby.get(`${baseURI}/api/`).expect(
+			'header', 'URI', '/api/'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 404
+		).expect(
+			'json', 'code', 404
+		).expect(
+			'json', 'status', 'Not Found'
+		).expectNot(
+			'header', 'Allow', Joi.any()
+		).expect(
+			'json', 'links', ['event/1', 'events/', 'auth/']
+		).expect(
+			'json', 'message', `NoRouteFoundError: Please see the links property to learn which routes are available.`
 		).expectNot(
 			'json', 'data', Joi.any()
 		);

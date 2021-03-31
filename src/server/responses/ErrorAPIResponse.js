@@ -207,7 +207,7 @@ export class F404ErrorAPIResponse extends ErrorAPIResponse {
 
 	constructor(serviceResponse){
 		super(serviceResponse);
-		const {params, serviceRoute, serviceMethod} = serviceResponse.get();
+		const {params, serviceRoute} = serviceResponse.get();
 		this.code = 404;
 		this.status = 'Not Found';
 		this.data = null;
@@ -224,7 +224,7 @@ export class F404ErrorAPIResponse extends ErrorAPIResponse {
  *
  * @class
  * @classdesc An EventF404ErrorAPIResponse carries data resulting from a failed API request.
- * @extends ErrorAPIResponse
+ * @extends F404ErrorAPIResponse
  */
 export class EventF404ErrorAPIResponse extends (mixin(ErrorCommon, F404ErrorAPIResponse)) {
 
@@ -233,6 +233,29 @@ export class EventF404ErrorAPIResponse extends (mixin(ErrorCommon, F404ErrorAPIR
 		const {serviceRoute, options} = serviceResponse.get();
 		this.addCommonLinks(serviceRoute);
 		this.addCommonAllowHeader(options);
+	}
+
+}
+
+
+/**
+ * Responsible for creating a new DiscoverableF404ErrorAPIResponse.
+ *
+ * @class
+ * @classdesc A DiscoverableF404ErrorAPIResponse carries data resulting from a failed API request.
+ * @extends F404ErrorAPIResponse
+ */
+export class DiscoverableF404ErrorAPIResponse extends (mixin(ErrorCommon, F404ErrorAPIResponse)) {
+
+	constructor(serviceResponse){
+		super(serviceResponse);
+		const {error} = serviceResponse.get();
+		Object.values(this.common).forEach(
+			link => {
+				if(!this.links.includes(link)) this.links.push(link);
+			}
+		);
+		this.message = error.toString();
 	}
 
 }
@@ -248,7 +271,7 @@ export class F405ErrorAPIResponse extends ErrorAPIResponse {
 
 	constructor(serviceResponse){
 		super(serviceResponse);
-		const {serviceRoute, serviceMethod} = serviceResponse.get();
+		const {serviceRoute} = serviceResponse.get();
 		this.code = 405;
 		this.status = 'Method Not Allowed';
 		this.data = null;
