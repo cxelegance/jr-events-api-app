@@ -2,7 +2,7 @@
 **yarn install**<br>
 **yarn run test**<br>
 Cool?<br>
-**yarn run build-server**<br>
+**yarn run build**<br>
 **yarn run start**<br>
 End process when you're done.<br>
 If you wanna clean up:<br>
