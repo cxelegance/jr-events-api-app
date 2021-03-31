@@ -39,7 +39,7 @@ Yet to be created; a simple version is intended before going to version 1.0.
 That would have been cleaner, but the intention is for the app to render an HTML list of all records prior to JavaScript loading. If JavaScript does not load, then the app will have still delivered the main information expected of the app.
 
 ### API Layers and Flow Diagram
-[API Layers and Flow Diagram](src/planning/API%20Layers%20and%20Flow.png).<br>
+[API Layers and Flow Diagram](src/server/planning/API%20Layers%20and%20Flow.png).<br>
 This [MDN structure example](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes) was referenced prior to designing.
 
 #### HTTP Layer
@@ -52,7 +52,7 @@ Essentially a Services business front, accepting and responding to requests from
 Here lie the database and models, including the schema definitions appropriate to the business needs. The models are used by the Services in the parent layer.
 
 ### API Spec UML
-The [API Spec UML](src/planning/API%20spec%20UML.png) shows most entity relationships for the API.
+The [API Spec UML](src/server/planning/API%20spec%20UML.png) shows most entity relationships for the API.
 
 ## API: Creating the Master Password
 **yarn install**<br>
