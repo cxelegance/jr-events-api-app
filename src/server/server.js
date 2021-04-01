@@ -9,7 +9,7 @@ import ServiceToAPIResponseMap from './maps/ServiceToAPIResponseMap';
 import Route from './routes/Route';
 
 const dotenvResult = dotenv.config();
-if(dotenvResult.error) throw dotenvResult.error;
+if(dotenvResult.error && process.env.NODE_ENV !== 'production') throw dotenvResult.error;
 
 const db = open({
     path: process.env.DB_PATH,
