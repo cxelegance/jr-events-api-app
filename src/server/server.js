@@ -45,10 +45,10 @@ const controllerFactory = new ControllerFactory(serviceFactory, serviceToAPIResp
 const httpServer = new HTTPServer(port, routes, controllerFactory);
 
 /*
- * Do NOT leave the log level on 'debug' or 'trace'! Request params will be logged! Think: passwords exposed
+ * Do NOT leave the log level on 'debug' or 'trace'! Request params will be logged! Think: passwords exposed.
+ * Leave it on 'info'.
  */
-httpServer.log.level('info');
-// httpServer.log.level('trace');
+httpServer.log.level(process.env.LOGGER_LEVEL);
 
 // Do NOT leave these in!
 // httpServer.setFakeSecure(true);
