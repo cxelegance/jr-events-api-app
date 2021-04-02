@@ -4,6 +4,5 @@
 /.env
 /database/
 /server/
-/src/server/lib/Hashword.js
 /sandbox/
 /src/server/planning/songkickResults.json
