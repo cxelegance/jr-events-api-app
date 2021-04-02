@@ -11,6 +11,14 @@ It is maintained in [Markdown](https://www.markdownguide.org/).
 - POST or other method to replace all records with array of records
 - remove authToken from Controller::handleRequest()
 
+## [0.2.2] - 2021-04-01
+### Changed
+- forgot to update changelog
+
+## [0.2.1] - 2021-04-01
+### Changed
+- tweak to work on Heroku host/system
+
 ## [0.2.0] - 2021-03-31
 ### Added
 - handle bad routes on the /api/ root route
