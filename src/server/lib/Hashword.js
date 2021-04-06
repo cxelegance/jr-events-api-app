@@ -19,8 +19,10 @@ const isDebug = process.env.LOGGER_LEVEL === 'trace' || process.env.LOGGER_LEVEL
 export const saltAndHash = hashword => {
 	return bcrypt.hash(hashword, saltRounds).catch(
 		e => {
-			if(isDebug) throw e;
-			else throw new CryptographyError('The contents of the error are hidden for security reasons.');
+			if(isDebug){
+				e.message += `; saltAndHash() received hashword=${hashword}.`;
+				throw e;
+			}else throw new CryptographyError('The contents of the error are hidden for security reasons.');
 		}
 	);
 };
@@ -36,8 +38,10 @@ export const saltAndHash = hashword => {
 export const isMatch = (hashword, stored) => {
 	return bcrypt.compare(hashword, stored).catch(
 		e => {
-			if(isDebug) throw e;
-			else throw new CryptographyError('The contents of the error are hidden for security reasons.');
+			if(isDebug){
+				e.message += `; isMatch() received hashword=${hashword} and stored=${stored}.`;
+				throw e;
+			}else throw new CryptographyError('The contents of the error are hidden for security reasons.');
 		}
 	);
 };
