@@ -60,6 +60,7 @@ export default class HTTPServer{
 		this.controllerFactory = controllerFactory;
 		this.app = express();
 		this.app.use(express.json());
+		this.app.enable('trust proxy');
 		this.authServiceRoute = 'Auth';
 		this.log = bunyan.createLogger({name: 'HTTPServer'});
 		this.parseParams();
@@ -225,6 +226,7 @@ export default class HTTPServer{
 						const method = req.method;
 						const isSecure = req.secure;
 						const protocol = this.#isFakeSecure ? 'https' : req.protocol;
+						const xfProtocol = req.get('X-Forwarded-Proto');
 						const serviceVersion = req.serviceVersion;
 						const params = req.params;
 						const parsedParams = req.parsedParams;
@@ -232,6 +234,7 @@ export default class HTTPServer{
 						this.log.debug(`method: ${method}`);
 						this.log.debug(`isSecure: ${isSecure}`);
 						this.log.debug(`protocol: ${protocol}`);
+						this.log.debug(`x-forwarded-protocol: ${xfProtocol}`);
 						this.log.debug(`serviceRoute: ${serviceRoute}`);
 						this.log.debug(`serviceVersion: ${serviceVersion}`);
 						this.log.debug({params}, 'params');
