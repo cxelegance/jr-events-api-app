@@ -103,6 +103,7 @@ export default class ServiceToAPIResponseMap extends Map{
 		this.set(this.formKey( 'Auth', 'post' ), AuthS201SuccessAPIResponse);
 		this.set(this.formKey( 'Auth', 'post', 'RecordExistsError' ), F204ErrorAPIResponse);
 		this.set(this.formKey( 'Auth', 'post', 'InsecureOperationError' ), AuthTLSF403ErrorAPIResponse);
+		this.set(this.formKey( 'Auth', 'post', 'CryptographyError' ), AuthF500ErrorAPIResponse);
 
 		/*
 		 * Events Service

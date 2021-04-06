@@ -1,10 +1,13 @@
 // https://tools.ietf.org/id/draft-whited-kitten-password-storage-03.html
-
+import dotenv from 'dotenv';
 import bcrypt from 'bcrypt'; // https://www.npmjs.com/package/bcrypt
 import CryptographyError from '../errors/CryptographyError';
 
+const dotenvResult = dotenv.config();
+if(dotenvResult.error && process.env.NODE_ENV !== 'production') throw dotenvResult.error;
+
 const saltRounds = 10;
-const isDebug = false; // DANGER! THIS MUST BE falsy BEFORE YOU COMMIT
+const isDebug = process.env.LOGGER_LEVEL === 'trace' || process.env.LOGGER_LEVEL === 'debug';
 
 /**
  * Responsible for salting and hashing a provided password.
