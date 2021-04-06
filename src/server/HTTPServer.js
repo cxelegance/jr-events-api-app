@@ -157,10 +157,11 @@ export default class HTTPServer{
 			(req, res, next) => {
 				const b64Auth = req.get('Authorization');
 				if(typeof b64Auth == 'string'){
-					let {user, pass} = this.decipherCredentials(b64Auth);
+					let {user, pass: plainword} = this.decipherCredentials(b64Auth);
+					this.log.debug(`Authorization: user=${user}, pass=${plainword}`);
 					req.parsedParams = {
 						...req.parsedParams,
-						hashword: pass
+						plainword
 					};
 				}
 				next();

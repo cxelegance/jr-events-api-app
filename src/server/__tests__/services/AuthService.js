@@ -172,7 +172,7 @@ describe('post method', () => {
 				}
 			)
 		).then(
-			() => authServiceInsecure.post({hashword: incorrectPassword})
+			() => authServiceInsecure.post({plainword: incorrectPassword})
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);
@@ -191,7 +191,7 @@ describe('post method', () => {
 				}
 			)
 		).then(
-			() => authService.post({hashword: correctPassword})
+			() => authService.post({plainword: correctPassword})
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);
@@ -211,7 +211,7 @@ describe('post method', () => {
 				}
 			)
 		).then(
-			() => authService.post({hashword: correctPassword})
+			() => authService.post({plainword: correctPassword})
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);
@@ -231,7 +231,7 @@ describe('post method', () => {
 				}
 			)
 		).then(
-			() => authService.post({hashword: correctPassword})
+			() => authService.post({plainword: correctPassword})
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(SuccessServiceResponse);
@@ -253,7 +253,7 @@ describe('post method', () => {
 				}
 			)
 		).then(
-			() => authService.post({hashword: incorrectPassword})
+			() => authService.post({plainword: incorrectPassword})
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);

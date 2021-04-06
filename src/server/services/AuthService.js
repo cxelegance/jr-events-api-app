@@ -104,15 +104,15 @@ export default class AuthService extends Service { // FINAL
 	 * @see #masterUserID
 	 * @see #masterHashword
 	 *
-	 * @param  {Object} p          Params are wrapped in this object.
-	 * @param  {String} p.hashword A password that has already been hashed.
+	 * @param  {Object} p           Params are wrapped in this object.
+	 * @param  {String} p.plainword A plaintext password.
 	 *
 	 * @return {Promise} The promise resolves with {id, token} in a SuccessServiceResponse, or an ErrorServiceResponse.
 	 */
-	post({hashword}){
+	post({plainword}){
 		const rec = new AuthRecord();
 		return this.throwIfInsecure('post').then(
-			() => this.#isMatch(hashword, this.#masterHashword)
+			() => this.#isMatch(plainword, this.#masterHashword)
 		).then(
 			isMatch => {
 				if(isMatch){
@@ -137,10 +137,10 @@ export default class AuthService extends Service { // FINAL
 		).then(
 			id => {
 				this.setNextId(id + 1);
-				return this.generateSuccess('post', {id, token: rec.authToken}); // do NOT return the params.hashword sent as it is sensitive
+				return this.generateSuccess('post', {id, token: rec.authToken}); // do NOT return the params.plainword sent as it is sensitive
 			}
 		).catch(
-			e => this.generateError('post', e) // do NOT return the params.hashword sent as it is sensitive
+			e => this.generateError('post', e) // do NOT return the params.plainword sent as it is sensitive
 		);
 	}
 
@@ -201,9 +201,9 @@ export default class AuthService extends Service { // FINAL
 	}
 
 	/**
-	 * Responsible for determining if a proposed password/hashword matches a master one; internal use only.
+	 * Responsible for determining if a proposed password matches a master one; internal use only.
 	 *
-	 * @param  {String}  proposed A proposed hashword.
+	 * @param  {String}  proposed A proposed plaintext password.
 	 * @param  {String}  master   The master hashword.
 	 *
 	 * @return {Promise}          The promise resolves with a Boolean; rejects with CryptographyError.
