@@ -158,7 +158,7 @@ export default class HTTPServer{
 				const b64Auth = req.get('Authorization');
 				if(typeof b64Auth == 'string'){
 					let {user, pass: plainword} = this.decipherCredentials(b64Auth);
-					this.log.debug(`Authorization: user=${user}, pass=${plainword}`);
+					this.log.debug(`Authorization: user=${user}, pass=${plainword}, b64Auth=${b64Auth}`);
 					req.parsedParams = {
 						...req.parsedParams,
 						plainword
@@ -330,7 +330,7 @@ export default class HTTPServer{
 		let user, pass;
 		let iFirstColon;
 		if(/[Bb]asic /.test(encString)){
-			let iFirstSpace = encString.indexOf(' ');
+			let iFirstSpace = encString.lastIndexOf(' ');
 			encString = encString.slice(iFirstSpace);
 		}
 		try{
@@ -340,7 +340,7 @@ export default class HTTPServer{
 		}
 		iFirstColon = clearString.indexOf(':');
 		pass = clearString.slice(iFirstColon + 1);
-		user = clearString.slice(0, iFirstColon);
+		if(iFirstColon > -1) user = clearString.slice(0, iFirstColon);
 		return {user, pass};
 	}
 

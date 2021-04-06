@@ -89,6 +89,21 @@ test('HTTPServer instantiates correctly', () => {
 	expect(httpServer.routes).toEqual(routes);
 });
 
+test('HTTPServer decipherCredentials() works correctly', () => {
+	expect(httpServer.decipherCredentials('Basic dXNlcjpwYXNz')).toEqual({user: 'user', pass: 'pass'});
+	expect(httpServer.decipherCredentials('dXNlcjpwYXNz')).toEqual({user: 'user', pass: 'pass'});
+	expect(httpServer.decipherCredentials('Basic dXNlcjpwYXNz')).toEqual({user: 'user', pass: 'pass'});
+	expect(httpServer.decipherCredentials('Basic anVzdFBhc3M=')).toEqual({user: undefined, pass: 'justPass'});
+	expect(httpServer.decipherCredentials('anVzdFBhc3M=')).toEqual({user: undefined, pass: 'justPass'});
+	expect(httpServer.decipherCredentials('Basic bXlVc2VyOm15UGFzcw==')).toEqual({user: 'myUser', pass: 'myPass'});
+	expect(httpServer.decipherCredentials('Basic  bXlVc2VyOm15UGFzcw==')).toEqual({user: 'myUser', pass: 'myPass'});
+	expect(httpServer.decipherCredentials('bXlVc2VyOm15UGFzcw==')).toEqual({user: 'myUser', pass: 'myPass'});
+	expect(httpServer.decipherCredentials('')).toEqual({user: undefined, pass: ''});
+	expect(httpServer.decipherCredentials('a')).toEqual({user: undefined, pass: undefined});
+	expect(httpServer.decipherCredentials('b')).toEqual({user: undefined, pass: undefined});
+	expect(httpServer.decipherCredentials('c')).toEqual({user: undefined, pass: undefined});
+});
+
 describe('HTTPServer returns all expected APIResponses for /api/auth', () => {
 
 	test('GET returns 403 Forbidden in general', () => {
