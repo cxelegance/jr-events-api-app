@@ -72,7 +72,7 @@ export class F400ErrorAPIResponse extends ErrorAPIResponse {
 	constructor(serviceResponse){
 		super(serviceResponse);
 		this.code = 400;
-		this.status = 'FAIL';
+		this.status = 'Bad Request';
 	}
 
 }

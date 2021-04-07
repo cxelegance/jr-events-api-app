@@ -4,6 +4,7 @@ import AuthenticationFailedError from '../errors/AuthenticationFailedError';
 import ReauthenticationRequiredError from '../errors/ReauthenticationRequiredError';
 import AuthRecord from '../records/AuthRecord';
 import NoRecordsFoundError from '../errors/NoRecordsFoundError';
+import ParameterTypeError from '../errors/ParameterTypeError';
 
 /**
  * Responsible for defining the AuthService.
@@ -112,6 +113,10 @@ export default class AuthService extends Service { // FINAL
 	post({plainword}){
 		const rec = new AuthRecord();
 		return this.throwIfInsecure('post').then(
+			() => {
+				if(typeof plainword != 'string') throw new ParameterTypeError('expecting password to be a string.');
+			}
+		).then(
 			() => this.#isMatch(plainword, this.#masterHashword)
 		).then(
 			isMatch => {

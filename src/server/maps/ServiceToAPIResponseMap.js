@@ -8,6 +8,7 @@ import {
 } from '../responses/SuccessAPIResponse';
 import {
 	F204ErrorAPIResponse,
+	F400ErrorAPIResponse,
 	F401ErrorAPIResponse,
 	AuthF403ErrorAPIResponse,
 	AuthTLSF403ErrorAPIResponse,
@@ -104,6 +105,7 @@ export default class ServiceToAPIResponseMap extends Map{
 		this.set(this.formKey( 'Auth', 'post', 'RecordExistsError' ), F204ErrorAPIResponse);
 		this.set(this.formKey( 'Auth', 'post', 'InsecureOperationError' ), AuthTLSF403ErrorAPIResponse);
 		this.set(this.formKey( 'Auth', 'post', 'CryptographyError' ), AuthF500ErrorAPIResponse);
+		this.set(this.formKey( 'Auth', 'post', 'ParameterTypeError' ), F400ErrorAPIResponse);
 
 		/*
 		 * Events Service
