@@ -336,6 +336,7 @@ export default class HTTPServer{
 		try{
 			clearString = atob(encString);
 		}catch(e){
+			this.log.debug(`${e.toString()}; encString=${encString}`);
 			return {user, pass};
 		}
 		iFirstColon = clearString.indexOf(':');

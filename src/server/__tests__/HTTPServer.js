@@ -102,6 +102,11 @@ test('HTTPServer decipherCredentials() works correctly', () => {
 	expect(httpServer.decipherCredentials('a')).toEqual({user: undefined, pass: undefined});
 	expect(httpServer.decipherCredentials('b')).toEqual({user: undefined, pass: undefined});
 	expect(httpServer.decipherCredentials('c')).toEqual({user: undefined, pass: undefined});
+	expect(httpServer.decipherCredentials('Basic')).toEqual({user: undefined, pass: undefined});
+	expect(httpServer.decipherCredentials('Basic  ')).toEqual({user: undefined, pass: ''});
+	expect(httpServer.decipherCredentials('Basic a')).toEqual({user: undefined, pass: undefined});
+	expect(httpServer.decipherCredentials('Basic b')).toEqual({user: undefined, pass: undefined});
+	expect(httpServer.decipherCredentials('Basic c')).toEqual({user: undefined, pass: undefined});
 });
 
 describe('HTTPServer returns all expected APIResponses for /api/auth', () => {
@@ -124,6 +129,31 @@ describe('HTTPServer returns all expected APIResponses for /api/auth', () => {
 			'json', 'links', ['auth/']
 		).expectNot(
 			'json', 'message', Joi.any()
+		).expectNot(
+			'json', 'data', Joi.any()
+		);
+	});
+
+	test('POST returns 400 Bad Request on ErrorServiceResponse with BadParameterError', () => {
+		httpServer.setFakeSecure(true);
+		return frisby.setup({
+			request: {
+				headers: {
+					'Authorization': `Basic`
+				}
+			}
+		}).post(`${baseURI}/api/auth`).expect(
+			'header', 'URI', '/api/auth'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 400
+		).expect(
+			'json', 'code', 400
+		).expect(
+			'json', 'status', 'Bad Request'
+		).expect(
+			'json', 'message', 'ParameterTypeError: expecting password to be a string.'
 		).expectNot(
 			'json', 'data', Joi.any()
 		);
