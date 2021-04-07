@@ -1,5 +1,6 @@
 import express from 'express';
 import bunyan from 'bunyan';
+import atob from 'atob';
 
 import ConfirmAuthorizationError from './errors/ConfirmAuthorizationError';
 import UnauthorizedError from './errors/UnauthorizedError';
@@ -326,22 +327,26 @@ export default class HTTPServer{
 	 * @return {Object}           The decoded credentials: {user=String|undefined, pass=String|undefined}.
 	 */
 	decipherCredentials(encString){
-		let clearString;
+		let clearString, base64String;
 		let user, pass;
-		let iFirstColon;
-		if(/[Bb]asic /.test(encString)){
-			let iFirstSpace = encString.lastIndexOf(' ');
-			encString = encString.slice(iFirstSpace);
-		}
+		let iFirstColon, iSpace;
 		try{
-			clearString = atob(encString);
+			if(!/^[Bb]asic\s\S/.test(encString)){
+				throw new TypeError(`encString should begin with "Basic", then a space, then some base64 text; encString: ${encString}`);
+			}
+			iSpace = encString.indexOf(' ');
+			base64String = encString.slice(iSpace);
+			clearString = atob(base64String); // this will throw if atob is missing and, depending on implementation, if encString isn't nice base64
+			iFirstColon = clearString.indexOf(':');
+			if(iFirstColon == -1) throw new TypeError(`clearString is missing colon separating username from password; clearString: ${clearString}`);
+			pass = clearString.slice(iFirstColon + 1);
+			user = clearString.slice(0, iFirstColon);
 		}catch(e){
-			this.log.debug(`${e.toString()}; encString=${encString}`);
+			this.log.debug(`decipherCredentials() ${e.toString()}`);
+			user = undefined;
+			pass = undefined;
 			return {user, pass};
 		}
-		iFirstColon = clearString.indexOf(':');
-		pass = clearString.slice(iFirstColon + 1);
-		if(iFirstColon > -1) user = clearString.slice(0, iFirstColon);
 		return {user, pass};
 	}
 

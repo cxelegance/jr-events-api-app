@@ -91,22 +91,22 @@ test('HTTPServer instantiates correctly', () => {
 
 test('HTTPServer decipherCredentials() works correctly', () => {
 	expect(httpServer.decipherCredentials('Basic dXNlcjpwYXNz')).toEqual({user: 'user', pass: 'pass'});
-	expect(httpServer.decipherCredentials('dXNlcjpwYXNz')).toEqual({user: 'user', pass: 'pass'});
-	expect(httpServer.decipherCredentials('Basic dXNlcjpwYXNz')).toEqual({user: 'user', pass: 'pass'});
-	expect(httpServer.decipherCredentials('Basic anVzdFBhc3M=')).toEqual({user: undefined, pass: 'justPass'});
-	expect(httpServer.decipherCredentials('anVzdFBhc3M=')).toEqual({user: undefined, pass: 'justPass'});
+	expect(httpServer.decipherCredentials('dXNlcjpwYXNz')).toEqual({user: undefined, pass: undefined});
+	expect(httpServer.decipherCredentials('Basic anVzdFBhc3M=')).toEqual({user: undefined, pass: undefined});
+	expect(httpServer.decipherCredentials('anVzdFBhc3M=')).toEqual({user: undefined, pass: undefined});
 	expect(httpServer.decipherCredentials('Basic bXlVc2VyOm15UGFzcw==')).toEqual({user: 'myUser', pass: 'myPass'});
-	expect(httpServer.decipherCredentials('Basic  bXlVc2VyOm15UGFzcw==')).toEqual({user: 'myUser', pass: 'myPass'});
-	expect(httpServer.decipherCredentials('bXlVc2VyOm15UGFzcw==')).toEqual({user: 'myUser', pass: 'myPass'});
-	expect(httpServer.decipherCredentials('')).toEqual({user: undefined, pass: ''});
+	expect(httpServer.decipherCredentials('Basic  bXlVc2VyOm15UGFzcw==')).toEqual({user: undefined, pass: undefined});
+	expect(httpServer.decipherCredentials('bXlVc2VyOm15UGFzcw==')).toEqual({user: undefined, pass: undefined});
+	expect(httpServer.decipherCredentials('')).toEqual({user: undefined, pass: undefined});
 	expect(httpServer.decipherCredentials('a')).toEqual({user: undefined, pass: undefined});
 	expect(httpServer.decipherCredentials('b')).toEqual({user: undefined, pass: undefined});
 	expect(httpServer.decipherCredentials('c')).toEqual({user: undefined, pass: undefined});
 	expect(httpServer.decipherCredentials('Basic')).toEqual({user: undefined, pass: undefined});
-	expect(httpServer.decipherCredentials('Basic  ')).toEqual({user: undefined, pass: ''});
+	expect(httpServer.decipherCredentials('Basic  ')).toEqual({user: undefined, pass: undefined});
 	expect(httpServer.decipherCredentials('Basic a')).toEqual({user: undefined, pass: undefined});
 	expect(httpServer.decipherCredentials('Basic b')).toEqual({user: undefined, pass: undefined});
 	expect(httpServer.decipherCredentials('Basic c')).toEqual({user: undefined, pass: undefined});
+	expect(httpServer.decipherCredentials('Basic Og==')).toEqual({user: '', pass: ''});
 });
 
 describe('HTTPServer returns all expected APIResponses for /api/auth', () => {

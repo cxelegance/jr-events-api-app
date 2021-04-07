@@ -1,5 +1,6 @@
 {
 	"dependencies": {
+		"atob": "^2.1.2",
 		"@babel/cli": "7.10.4",
 		"@babel/core": "7.0.0",
 		"@babel/polyfill": "7.10.4",
