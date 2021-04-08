@@ -158,11 +158,12 @@ export default class HTTPServer{
 			(req, res, next) => {
 				const b64Auth = req.get('Authorization');
 				if(typeof b64Auth == 'string'){
-					let {user, pass: plainword} = this.decipherCredentials(b64Auth);
-					this.log.debug(`Authorization: user=${user}, pass=${plainword}, b64Auth=${b64Auth}`);
+					let {user, pass: plainword, authToken} = this.decipherCredentials(b64Auth);
+					this.log.debug(`Authorization: user=${user}, pass=${plainword}, authToken=${authToken}, b64Auth=${b64Auth}`);
 					req.parsedParams = {
 						...req.parsedParams,
-						plainword
+						plainword,
+						authToken
 					};
 				}
 				next();
@@ -324,30 +325,34 @@ export default class HTTPServer{
 	 *
 	 * @param  {String} encString The encoded credentials.
 	 *
-	 * @return {Object}           The decoded credentials: {user=String|undefined, pass=String|undefined}.
+	 * @return {Object}           The decoded credentials: {user=String|undefined, pass=String|undefined, authToken=String|undefined}.
 	 */
 	decipherCredentials(encString){
 		let clearString, base64String;
-		let user, pass;
+		let user, pass, authToken;
 		let iFirstColon, iSpace;
+		const isBasic = /^Basic\s\S/.test(encString);
+		const isBearer = /^Bearer\s\S/.test(encString);
 		try{
-			if(!/^[Bb]asic\s\S/.test(encString)){
-				throw new TypeError(`encString should begin with "Basic", then a space, then some base64 text; encString: ${encString}`);
+			if(!isBasic && !isBearer)){
+				throw new TypeError(`encString should begin with "Basic" or "Bearer", then a space, then some base64 text; encString: ${encString}`);
 			}
 			iSpace = encString.indexOf(' ');
 			base64String = encString.slice(iSpace);
 			clearString = atob(base64String); // this will throw if atob is missing and, depending on implementation, if encString isn't nice base64
 			iFirstColon = clearString.indexOf(':');
 			if(iFirstColon == -1) throw new TypeError(`clearString is missing colon separating username from password; clearString: ${clearString}`);
-			pass = clearString.slice(iFirstColon + 1);
+			if(isBasic) pass = clearString.slice(iFirstColon + 1);
+			else authToken = clearString.slice(iFirstColon + 1);
 			user = clearString.slice(0, iFirstColon);
 		}catch(e){
 			this.log.debug(`decipherCredentials() ${e.toString()}`);
 			user = undefined;
 			pass = undefined;
-			return {user, pass};
+			authToken = undefined;
+			return {user, pass, authToken};
 		}
-		return {user, pass};
+		return {user, pass, authToken};
 	}
 
 	/**
