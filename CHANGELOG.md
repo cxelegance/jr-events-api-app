@@ -11,6 +11,17 @@ It is maintained in [Markdown](https://www.markdownguide.org/).
 - POST or other method to replace all records with array of records
 - remove authToken from Controller::handleRequest()
 
+## [0.2.3] - 2021-04-08
+### Added
+- Hashword lib added for authentication
+- added ParameterTypeError for Services to complain with TypeError
+- atob() added as a dependency for Heroku
+
+### Changed
+- debugging control given to process.env
+- Express now uses "trust proxy"
+- various bug fixes in handling of passwords and authentication
+
 ## [0.2.2] - 2021-04-01
 ### Changed
 - forgot to update changelog
