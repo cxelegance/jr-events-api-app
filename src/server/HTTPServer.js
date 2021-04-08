@@ -334,7 +334,7 @@ export default class HTTPServer{
 		const isBasic = /^Basic\s\S/.test(encString);
 		const isBearer = /^Bearer\s\S/.test(encString);
 		try{
-			if(!isBasic && !isBearer)){
+			if(!isBasic && !isBearer){
 				throw new TypeError(`encString should begin with "Basic" or "Bearer", then a space, then some base64 text; encString: ${encString}`);
 			}
 			iSpace = encString.indexOf(' ');
