@@ -236,7 +236,7 @@ export default class HTTPServer{
 						const serviceVersion = req.serviceVersion;
 						const params = req.params;
 						const parsedParams = req.parsedParams;
-						const authToken = req.params.authToken;
+						const authToken = req.parsedParams.authToken;
 						this.log.debug(`method: ${method}`);
 						this.log.debug(`isSecure: ${isSecure}`);
 						this.log.debug(`protocol: ${protocol}`);
