@@ -6,7 +6,7 @@ import ServiceToAPIResponseMap from '../../maps/ServiceToAPIResponseMap';
 import db from '../models/__mocks__/db';
 
 const freshLimit = 5 * 60 * 1000; // 5 minutes
-const masterUserID = 100;
+const masterUserID = "100";
 const masterHashword = 'hey testing';
 let serviceFactory;
 let eventController;

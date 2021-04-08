@@ -17,7 +17,7 @@ export default class AuthService extends Service { // FINAL
 	/** @type {Number} Number of milliseconds that an AuthRecord is valid for. */
 	#freshLimit;
 
-	/** @type {Number} The userID for the master user. */
+	/** @type {String} The userID for the master user. */
 	#masterUserID;
 
 	/** @type {String} The hashword for the master user. */
@@ -31,7 +31,7 @@ export default class AuthService extends Service { // FINAL
 	 * @param {Object}        db             See Service.
 	 * @param {Boolean}       isSecure       See Service.
 	 * @param {Number}        freshLimit     For setting the internal property of the same name.
-	 * @param {Number}        masterUserID   For setting the internal property of the same name.
+	 * @param {String}        masterUserID   For setting the internal property of the same name.
 	 * @param {String}        masterHashword For setting the internal property of the same name.
 	 */
 	constructor(modelFactory, db, isSecure, freshLimit, masterUserID, masterHashword){
@@ -59,14 +59,14 @@ export default class AuthService extends Service { // FINAL
 	 * @see #isFresh
 	 * @see ReauthenticationRequiredError
 	 *
-	 * @param  {Object}        p    Params are wrapped in this object.
-	 * @param  {Number|String} p.id The ID of the user to obtain records for, or the auth token of a specific record.
+	 * @param  {Object} p    Params are wrapped in this object.
+	 * @param  {String} p.id The ID of the user to obtain records for, or the auth token of a specific record.
 	 *
 	 * @return {Promise} The promise resolves with AuthRecord[] in a SuccessServiceResponse, or an ErrorServiceResponse.
 	 */
 	get({id}){
-		const fieldName = typeof id == 'number' ? 'userID' : 'authToken';
-		if(fieldName == 'userID') id = parseInt(id, 10);
+		const val = parseInt(id, 10);
+		const fieldName = !isNaN(val) && isFinite(val) && val + '' == id ? 'userID' : 'authToken';
 		return this.throwIfInsecure('get').then(
 			() => this.getModel()
 		).then(

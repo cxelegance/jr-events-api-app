@@ -22,7 +22,7 @@ authRecsValid.set('shell', new AuthRecord({
 authRecsValid.set(++nextIndex, new AuthRecord({
 	authID: nextIndex,
 	authToken: 'adfaf3qrasdfadfbasdasdf',
-	userID: 1,
+	userID: "1",
 	createdAt: 100000000
 }));
 
@@ -32,7 +32,7 @@ authRecsValid.set(++nextIndex, new AuthRecord({
 authRecsValid.set(++nextIndex, new AuthRecord({
 	authID: nextIndex,
 	authToken: 'bbbccccdddeeeeffff',
-	userID: 1,
+	userID: "1",
 	createdAt: 1000000
 }));
 
@@ -47,7 +47,7 @@ nextIndex = 0;
 authRecsInvalid.set(++nextIndex, new AuthRecord({
 	authID: 1,
 	authToken: 'adfaf3qrasdfadfbasdasdf',
-	userID: 1,
+	userID: "1",
 	createdAt: 100000000,
 	whatIsThis: '?'
 }));
@@ -57,7 +57,7 @@ authRecsInvalid.set(++nextIndex, new AuthRecord({
  */
 authRecsInvalid.set(++nextIndex, new AuthRecord({
 	authToken: 'adfaf3qrasdfadfbasdasdf',
-	userID: 1,
+	userID: "1",
 	createdAt: 100000000
 }));
 
@@ -66,7 +66,7 @@ authRecsInvalid.set(++nextIndex, new AuthRecord({
  */
 authRecsInvalid.set(++nextIndex, new AuthRecord({
 	authID: 1,
-	userID: 1,
+	userID: "1",
 	createdAt: 100000000
 }));
 
@@ -85,7 +85,7 @@ authRecsInvalid.set(++nextIndex, new AuthRecord({
 authRecsInvalid.set(++nextIndex, new AuthRecord({
 	authID: 1,
 	authToken: 'adfaf3qrasdfadfbasdasdf',
-	userID: 1,
+	userID: "1",
 }));
 
 /*
@@ -94,7 +94,7 @@ authRecsInvalid.set(++nextIndex, new AuthRecord({
 authRecsInvalid.set(++nextIndex, new AuthRecord({
 	authID: '3',
 	authToken: 'adfaf3qrasdfadfbasdasdf',
-	userID: 1,
+	userID: "1",
 	createdAt: 100000000
 }));
 
@@ -104,17 +104,17 @@ authRecsInvalid.set(++nextIndex, new AuthRecord({
 authRecsInvalid.set(++nextIndex, new AuthRecord({
 	authID: 1,
 	authToken: 3127596,
-	userID: 1,
+	userID: "1",
 	createdAt: 100000000
 }));
 
 /*
- * userID is not a number
+ * userID is not a string
  */
 authRecsInvalid.set(++nextIndex, new AuthRecord({
 	authID: 1,
 	authToken: 'adfaf3qrasdfadfbasdasdf',
-	userID: '1',
+	userID: 1,
 	createdAt: 100000000
 }));
 
@@ -124,7 +124,7 @@ authRecsInvalid.set(++nextIndex, new AuthRecord({
 authRecsInvalid.set(++nextIndex, new AuthRecord({
 	authID: 1,
 	authToken: 'adfaf3qrasdfadfbasdasdf',
-	userID: 1,
+	userID: "1",
 	createdAt: '100000000'
 }));
 

@@ -26,7 +26,7 @@ import {saltAndHash} from '../lib/Hashword';
 import Route from '../routes/Route';
 
 const freshLimit = 5 * 60 * 1000; // 5 minutes
-const masterUserID = 100;
+const masterUserID = "100";
 const masterClearword = 'hey just testing';
 const port = 3000;
 

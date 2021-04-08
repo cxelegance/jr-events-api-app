@@ -21,7 +21,7 @@ const incorrectPassword = 'hey';
 const correctPassword = 'ed809121b93e4ecab38659e77f5aa3ad';
 const masterHashword = '$2b$10$qhSeOdFQn7QQrDHfPnKe3Ofmiuo9TI.3sdV1Cm4BchUs1tfkVUOa6'; // salted and hashed correctPassword
 const freshLimit = 3 * 1000; // 5 seconds
-const masterUserID = 1;
+const masterUserID = "1";
 
 const waitPromise = ms => new Promise(
 	resolve => setTimeout(resolve, ms)
@@ -144,7 +144,7 @@ describe('get method', () => {
 		).then(
 			() => waitPromise(freshLimit)
 		).then(
-			() => authService.get({id: 1})
+			() => authService.get({id: "1"})
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);

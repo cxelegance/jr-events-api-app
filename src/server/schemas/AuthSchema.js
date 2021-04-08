@@ -19,7 +19,7 @@ export default class AuthSchema extends Schema {
 			note: 'this is a hash-style unique string'
 		},
 		userID: {
-			type: 'number',
+			type: 'string',
 			isRequired: true,
 		},
 		createdAt: {
