@@ -390,6 +390,7 @@ export default class HTTPServer{
 	 * @return {Promise} The promise resolves with UnauthorizedError (or child class) or void; it does not reject and consumption should have a catch block after it.
 	 */
 	getUnauthorizedError(method, protocol, serviceVersion, authToken, params){
+		this.log.debug({method, protocol, serviceVersion, authToken, params}, 'getUnauthorizedError() called');
 		return Promise.resolve(
 		).then(
 			() => this.controllerFactory.get(this.authServiceRoute, serviceVersion)
@@ -403,6 +404,7 @@ export default class HTTPServer{
 					return;
 				}else{
 					const {error} = serviceResponse;
+					this.log.debug({errorString: error.toString()}, 'serviceResponse is not instanceof SuccessServiceResponse');
 					if(error instanceof UnauthorizedError) return error;
 					else return new UnauthorizedError('Recommend authenticating first.');
 				}
