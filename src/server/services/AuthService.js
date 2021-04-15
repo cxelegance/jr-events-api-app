@@ -99,7 +99,7 @@ export default class AuthService extends Service { // FINAL
 		).then(
 			([rec]) => {
 				if(!rec) throw new NoRecordsFoundError();
-				if(rec instanceof AuthRecord && this.#isFresh(rec)){
+				if(this.#isFresh(rec)){
 					return [rec];
 				}else{
 					return this.delete(rec.authID).then(
