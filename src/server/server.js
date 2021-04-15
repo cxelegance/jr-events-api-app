@@ -35,7 +35,7 @@ const routes = [
 const serviceFactory = new ServiceFactory(
 	modelFactory,
 	db,
-	process.env.FRESHLIMIT,
+	parseInt(process.env.FRESHLIMIT, 10),
 	process.env.MASTERUSER,
 	process.env.MASTERPASS
 );

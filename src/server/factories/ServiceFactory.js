@@ -15,7 +15,7 @@ export default class ServiceFactory { // FINAL
 	/** @type {Number} How many milliseconds can transpire before an Authentication record goes stale? */
 	freshLimit;
 
-	/** @type {Number} The master admin userID. */
+	/** @type {String} The master admin userID. */
 	#masterUserID;
 
 	/** @type {String} The master admin password (should be hashed). */
@@ -25,7 +25,7 @@ export default class ServiceFactory { // FINAL
 	 * @param {ModelFactory} modelFactory   For setting the internal property of the same name.
 	 * @param {Object}       db             For setting the internal property of the same name.
 	 * @param {Number}       freshLimit     For setting the internal property of the same name.
-	 * @param {Number}       masterUserID   For setting the internal property of the same name.
+	 * @param {String}       masterUserID   For setting the internal property of the same name.
 	 * @param {String}       masterHashword For setting the internal property of the same name.
 	 */
 	constructor(modelFactory, db, freshLimit, masterUserID, masterHashword){
