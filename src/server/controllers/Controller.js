@@ -40,17 +40,13 @@ export default class Controller {
 	 * @param  {String} httpMethod            E.g., GET, POST, PUT, DELETE
 	 * @param  {String} httpProtocol          E.g., http, https
 	 * @param  {String} [serviceVersion=null] API Service version, e.g., undefined (v1), v2, v3, etc.
-	 * @param  {String} [authToken=null]      A token from a recent authentication.
 	 * @param  {Object} [params={}]           Parameters encapsulated in the request.
-	 *
-	 * @todo TODO remove authToken, it's in params already
 	 *
 	 * @return {Promise}                      The promise resolves with an APIResponse; it does not intentionally reject; add a catch block for anything unexpected.
 	 */
-	handleRequest(httpMethod, httpProtocol, serviceVersion = null, authToken = null, params = {}){
+	handleRequest(httpMethod, httpProtocol, serviceVersion = null, params = {}){
 		const methodName = httpMethod.toLowerCase();
 		if(serviceVersion === null) serviceVersion = undefined;
-		if(authToken === null) authToken = undefined;
 
 		return this.serviceFactory.get(
 			this.serviceRoute, serviceVersion, httpProtocol.toLowerCase() === 'https'

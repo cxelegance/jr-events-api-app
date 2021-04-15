@@ -41,7 +41,7 @@ describe('AuthController: ', () => {
 		);
 
 		return authController.handleRequest(
-			'GET', 'http', undefined, undefined, {id: 1}
+			'GET', 'http', undefined, {id: 1}
 		).then(
 			apiResponse => {
 				expect(apiResponse).toBeInstanceOf(ErrorAPIResponse);
@@ -57,7 +57,7 @@ describe('AuthController: ', () => {
 
 	test('handleRequest() rejects with ErrorAPIResponse and 404 for bad http methods: put', () => {
 		return authController.handleRequest(
-			'PUT', 'https', undefined, undefined, {id: 1}
+			'PUT', 'https', undefined, {id: 1}
 		).then(
 			apiResponse => {
 				expect(apiResponse).toBeInstanceOf(ErrorAPIResponse);
@@ -74,7 +74,7 @@ describe('AuthController: ', () => {
 
 	test('handleRequest() rejects with ErrorAPIResponse and 404 for bad http methods: _privatemethod', () => {
 		return authController.handleRequest(
-			'_privatemethod', 'https', undefined, undefined, {id: 1}
+			'_privatemethod', 'https', undefined, {id: 1}
 		).then(
 			apiResponse => {
 				expect(apiResponse).toBeInstanceOf(ErrorAPIResponse);
@@ -91,7 +91,7 @@ describe('AuthController: ', () => {
 
 	test('handleRequest() rejects with ErrorAPIResponse and 404 for bad http methods: constructor', () => {
 		return authController.handleRequest(
-			'constructor', 'https', undefined, undefined, {id: 1}
+			'constructor', 'https', undefined, {id: 1}
 		).then(
 			apiResponse => {
 				expect(apiResponse).toBeInstanceOf(ErrorAPIResponse);
@@ -108,7 +108,7 @@ describe('AuthController: ', () => {
 
 	test('handleRequest() handles non-public methods defined on the service correctly', () => {
 		return authController.handleRequest(
-			'isFresh', 'http', undefined, undefined, {id: 1}
+			'isFresh', 'http', undefined, {id: 1}
 		).then(
 			apiResponse => {
 				expect(apiResponse).toBeInstanceOf(ErrorAPIResponse);
@@ -125,7 +125,7 @@ describe('AuthController: ', () => {
 
 	test('handleRequest() handles properties defined on the service correctly', () => {
 		return authController.handleRequest(
-			'testingOnlyPropOnTheService', 'http', undefined, undefined, {id: 1}
+			'testingOnlyPropOnTheService', 'http', undefined, {id: 1}
 		).then(
 			apiResponse => {
 				expect(apiResponse).toBeInstanceOf(ErrorAPIResponse);
@@ -142,7 +142,7 @@ describe('AuthController: ', () => {
 
 	test('handleRequest() handles methods inherited (rather than defined on the service) correctly', () => {
 		return authController.handleRequest(
-			'testingOnlyMethodOnTheParentService', 'http', undefined, undefined, {serviceRoute: 'Auth'}
+			'testingOnlyMethodOnTheParentService', 'http', undefined, {serviceRoute: 'Auth'}
 		).then(
 			apiResponse => {
 				expect(apiResponse).toBeInstanceOf(ErrorAPIResponse);
@@ -162,7 +162,7 @@ describe('AuthController: ', () => {
 			throw new ReferenceError('Man, you are out of range!');
 		}
 		return authController.handleRequest(
-			'get', 'http', undefined, undefined, {id: 1}
+			'get', 'http', undefined, {id: 1}
 		).then(
 			apiResponse => {
 				expect(apiResponse).toBeInstanceOf(ErrorAPIResponse);
@@ -182,7 +182,7 @@ describe('AuthController: ', () => {
 			throw 1;
 		}
 		return authController.handleRequest(
-			'get', 'http', undefined, undefined, {id: 1}
+			'get', 'http', undefined, {id: 1}
 		).then(
 			apiResponse => {
 				expect(apiResponse).toBeInstanceOf(ErrorAPIResponse);
@@ -202,7 +202,7 @@ describe('AuthController: ', () => {
 			throw 'yo';
 		}
 		return authController.handleRequest(
-			'get', 'http', undefined, undefined, {id: 1}
+			'get', 'http', undefined, {id: 1}
 		).then(
 			apiResponse => {
 				expect(apiResponse).toBeInstanceOf(ErrorAPIResponse);

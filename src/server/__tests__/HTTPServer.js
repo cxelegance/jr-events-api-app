@@ -289,7 +289,7 @@ describe('HTTPServer returns all expected APIResponses for /api/auth', () => {
 		).expect(
 			'json', 'data.id', 3
 		).expect(
-			'jsonTypes', 'data.token', Joi.string().required()
+			'jsonTypes', 'data.authToken', Joi.string().required()
 		);
 	});
 

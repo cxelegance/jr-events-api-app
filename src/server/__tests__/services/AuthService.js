@@ -15,6 +15,7 @@ import RecordExistsError from '../../errors/RecordExistsError';
 import InsecureOperationError from '../../errors/InsecureOperationError';
 import AuthenticationFailedError from '../../errors/AuthenticationFailedError';
 import ReauthenticationRequiredError from '../../errors/ReauthenticationRequiredError';
+import ParameterTypeError from '../../errors/ParameterTypeError';
 
 let authService, authServiceInsecure;
 const incorrectPassword = 'hey';
@@ -87,7 +88,7 @@ describe('get method', () => {
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);
-				return expect(response.error).toBeInstanceOf(NoRecordsFoundError);
+				return expect(response.error).toBeInstanceOf(ParameterTypeError);
 			}
 		);
 	});
@@ -98,7 +99,7 @@ describe('get method', () => {
 		return authService.getModel().then(
 			authModel => new Promise( resolve => resolve(authModel.db.getRangeReturns(recs)) )
 		).then(
-			() => authService.get({id: recs[0].value.userID})
+			() => authService.get({userID: recs[0].value.userID})
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(SuccessServiceResponse);
@@ -113,7 +114,7 @@ describe('get method', () => {
 		return authService.getModel().then(
 			authModel => new Promise( resolve => resolve(authModel.db.getRangeReturns(recs)) )
 		).then(
-			() => authService.get({id: recs[0].value.authToken})
+			() => authService.get({authToken: recs[0].value.authToken})
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(SuccessServiceResponse);
@@ -128,7 +129,7 @@ describe('get method', () => {
 		return authServiceInsecure.getModel().then(
 			authModel => new Promise( resolve => resolve(authModel.db.getRangeReturns(recs)) )
 		).then(
-			() => authServiceInsecure.get({id: recs[0].value.userID})
+			() => authServiceInsecure.get({userID: recs[0].value.userID})
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(SuccessServiceResponse);
@@ -144,7 +145,7 @@ describe('get method', () => {
 		).then(
 			() => waitPromise(freshLimit)
 		).then(
-			() => authService.get({id: "1"})
+			() => authService.get({userID: "1"})
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);
@@ -235,7 +236,7 @@ describe('post method', () => {
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(SuccessServiceResponse);
-				expect(response.data.token).toEqual(expect.stringMatching(/^\w*$/gm));
+				expect(response.data.authToken).toEqual(expect.stringMatching(/^\w*$/gm));
 				return expect(response.data.id).toBe(3);
 
 			}

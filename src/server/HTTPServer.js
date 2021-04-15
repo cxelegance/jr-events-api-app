@@ -158,12 +158,13 @@ export default class HTTPServer{
 			(req, res, next) => {
 				const b64Auth = req.get('Authorization');
 				if(typeof b64Auth == 'string'){
-					let {user, pass: plainword, authToken} = this.decipherCredentials(b64Auth);
-					this.log.debug(`Authorization: user=${user}, pass=${plainword}, authToken=${authToken}, b64Auth=${b64Auth}`);
+					let {user: userID, pass: plainword, authToken} = this.decipherCredentials(b64Auth);
+					this.log.debug(`Authorization: user=${userID}, pass=${plainword}, authToken=${authToken}, b64Auth=${b64Auth}`);
 					req.parsedParams = {
 						...req.parsedParams,
 						plainword,
-						authToken
+						authToken,
+						userID
 					};
 				}
 				next();
@@ -236,7 +237,6 @@ export default class HTTPServer{
 						const serviceVersion = req.serviceVersion;
 						const params = req.params;
 						const parsedParams = req.parsedParams;
-						const authToken = req.parsedParams.authToken;
 						this.log.debug(`method: ${method}`);
 						this.log.debug(`isSecure: ${isSecure}`);
 						this.log.debug(`protocol: ${protocol}`);
@@ -246,7 +246,6 @@ export default class HTTPServer{
 						this.log.debug({params}, 'params');
 						this.log.debug({parsedParams}, 'parsedParams');
 						this.log.debug({together: {...params, ...parsedParams}}, 'params and parsedParams');
-						this.log.debug(`authToken: ${authToken}`);
 						new Promise(
 							(resolve, reject) => {
 								if(!this.existsAuthServiceRoute){
@@ -269,7 +268,7 @@ export default class HTTPServer{
 							controllerBuilt => {
 								controller = controllerBuilt;
 								return controller.handleRequest(
-									method, protocol, serviceVersion, authToken, {...params, ...parsedParams}
+									method, protocol, serviceVersion, {...params, ...parsedParams}
 								);
 							}
 						).then(
@@ -278,7 +277,7 @@ export default class HTTPServer{
 									return Promise.resolve(
 									).then(
 										() => this.getUnauthorizedError(
-											method, protocol, serviceVersion, authToken, {...params, ...parsedParams}
+											method, protocol, serviceVersion, {...params, ...parsedParams}
 										)
 									).then(
 										unAuthorizedError => {
@@ -384,19 +383,18 @@ export default class HTTPServer{
 	 * @param  {String} method         The service method in the request; to be implemented.
 	 * @param  {String} protocol       The HTTP protocol for the request.
 	 * @param  {String} serviceVersion The service version string provided in the request.
-	 * @param  {String} authToken      The auth token provided in the request.
-	 * @param  {Object} params         The params sent in the request; to be implemented.
+	 * @param  {Object} params         The params sent in the request.
 	 *
 	 * @return {Promise} The promise resolves with UnauthorizedError (or child class) or void; it does not reject and consumption should have a catch block after it.
 	 */
-	getUnauthorizedError(method, protocol, serviceVersion, authToken, params){
-		this.log.debug({method, protocol, serviceVersion, authToken, params}, 'getUnauthorizedError() called');
+	getUnauthorizedError(method, protocol, serviceVersion, params){
+		this.log.debug({method, protocol, serviceVersion, params}, 'getUnauthorizedError() called');
 		return Promise.resolve(
 		).then(
 			() => this.controllerFactory.get(this.authServiceRoute, serviceVersion)
 		).then(
 			authController => authController.handleRequest(
-				'get', protocol, serviceVersion, undefined, {authToken}
+				'get', protocol, serviceVersion, params
 			)
 		).then(
 			({serviceResponse}) => {

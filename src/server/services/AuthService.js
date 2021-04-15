@@ -59,20 +59,43 @@ export default class AuthService extends Service { // FINAL
 	 * @see #isFresh
 	 * @see ReauthenticationRequiredError
 	 *
-	 * @param  {Object} p    Params are wrapped in this object.
-	 * @param  {String} p.id The ID of the user to obtain records for, or the auth token of a specific record.
+	 * @param  {Object} p           Params are wrapped in this object.
+	 * @param  {Number} p.id        The ID of a specific record to obtain; this is third priority.
+	 * @param  {String} p.userID    The userID of a specific user to obtain record for; this is second priority.
+	 * @param  {String} p.authToken The authToken of a specific record to obtain; this is first priority.
+	 *
 	 *
 	 * @return {Promise} The promise resolves with AuthRecord[] in a SuccessServiceResponse, or an ErrorServiceResponse.
 	 */
-	get({id}){
-		const val = parseInt(id, 10);
-		const fieldName = !isNaN(val) && isFinite(val) && val + '' == id ? 'userID' : 'authToken';
+	get({id, authToken, userID}){
+		let fieldName, fieldVal;
 		return this.throwIfInsecure('get').then(
-			() => this.getModel()
+			() => {
+				if(authToken){
+					if(typeof authToken != 'string'){
+						throw new ParameterTypeError('authToken was provided but was not a string.');
+					}
+					fieldName = 'authToken';
+					fieldVal = authToken;
+				}else if(userID){
+					if(typeof userID != 'string' || !isFinite(userID) || parseInt(userID, 10) + '' != userID){
+						throw new ParameterTypeError('userID was provided but was not a string-wrapped integer.');
+					}
+					fieldName = 'userID';
+					fieldVal = userID;
+				}else{
+					if(typeof id != 'number' || !isFinite(id) || parseInt(id, 10) + '' != id){
+						throw new ParameterTypeError('id was provided but was not an integer.');
+					}
+					fieldName = 'authID'
+					fieldVal = id;
+				}
+				return this.getModel();
+			}
 		).then(
 			model => model.read(1)
 		).then(
-			recs => recs.filter( rec => rec[fieldName] === id )
+			recs => recs.filter( rec => rec[fieldName] === fieldVal )
 		).then(
 			([rec]) => {
 				if(!rec) throw new NoRecordsFoundError();
@@ -87,9 +110,9 @@ export default class AuthService extends Service { // FINAL
 				}
 			}
 		).then(
-			data => this.generateSuccess('get', data, {id})
+			data => this.generateSuccess('get', data, {id, authToken, userID})
 		).catch(
-			e => this.generateError('get', e, {id})
+			e => this.generateError('get', e, {id, authToken, userID})
 		);
 	}
 
@@ -142,7 +165,7 @@ export default class AuthService extends Service { // FINAL
 		).then(
 			id => {
 				this.setNextId(id + 1);
-				return this.generateSuccess('post', {id, token: rec.authToken}); // do NOT return the params.plainword sent as it is sensitive
+				return this.generateSuccess('post', {id, authToken: rec.authToken}); // do NOT return the params.plainword sent as it is sensitive
 			}
 		).catch(
 			e => this.generateError('post', e) // do NOT return the params.plainword sent as it is sensitive
