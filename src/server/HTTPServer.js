@@ -183,6 +183,8 @@ export default class HTTPServer{
 				req.parsedParams = {};
 
 				const records = req.body;
+				this.log.debug({records}, 'parseParams() getting records');
+				this.log.debug({req}, 'parseParams() reveals req');
 				if(records || records === '' || records === 0){
 					req.parsedParams = {
 						...req.parsedParms,
