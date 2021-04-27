@@ -11,11 +11,13 @@ import Route from './routes/Route';
 const dotenvResult = dotenv.config();
 if(dotenvResult.error && process.env.NODE_ENV !== 'production') throw dotenvResult.error;
 
-const db = open({
-    path: process.env.DB_PATH,
-    // any options go here, we can turn on/off compression like this:
-    compression: process.env.DB_COMPRESSION
-});
+const db = {
+	path: process.env.DB_PATH,
+	options: {
+		compression: process.env.DB_COMPRESSION
+	},
+	open: (path, options) => open({path, ...options})
+};
 
 const port = process.env.PORT || process.env.DEV_PORT;
 

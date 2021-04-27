@@ -1,4 +1,14 @@
 class db {
+	path;
+	options;
+	open;
+
+	constructor(){
+		this.path = '';
+		this.options = {};
+		this.open = () => this;
+	}
+
 	get(id){}
 
 	remove(id){}

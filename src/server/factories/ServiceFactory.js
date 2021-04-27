@@ -9,7 +9,7 @@ export default class ServiceFactory { // FINAL
 	/** @type {ModelFactory} A ModelFactory so that the Service can build models. */
 	modelFactory;
 
-	/** @type {Object} A database object. */
+	/** @type {Object} A database object. Update this? */
 	db;
 
 	/** @type {Number} How many milliseconds can transpire before an Authentication record goes stale? */
@@ -52,6 +52,8 @@ export default class ServiceFactory { // FINAL
 	 */
 	get(type, version, isSecure){
 		const typeServiceVersion = `${type}Service` + ( version ? (`_v_${version}`) : '' );
+		const db = {...this.db};
+		db.path += `-${type}`;
 		let serviceClass;
 		return import(
 			`../services/${typeServiceVersion}`
@@ -59,7 +61,7 @@ export default class ServiceFactory { // FINAL
 			imported => serviceClass = imported.default
 		).then(
 			() => new serviceClass(
-				this.modelFactory, this.db, isSecure, this.freshLimit, this.#masterUserID, this.#masterHashword
+				this.modelFactory, db.open(db.path, db.options), isSecure, this.freshLimit, this.#masterUserID, this.#masterHashword
 			)
 		);
 	}
