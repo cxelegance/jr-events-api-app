@@ -21,8 +21,6 @@ export default class ModelFactory {
 		const typeModelVersion = `${type}Model` + ( version ? (`_v_${version}`) : '' );
 		const typeSchemaVersion = `${type}Schema` + ( version ? (`_v_${version}`) : '' );
 		let schemaClass, modelClass;
-		const dbBuilt = {...db};
-		dbBuilt.path += `-${type}`;
 		return import(
 			`../schemas/${typeSchemaVersion}`
 		).then(
@@ -33,7 +31,7 @@ export default class ModelFactory {
 		).then(
 			imported => modelClass = imported.default
 		).then(
-			() => new modelClass(new (schemaClass)(), dbBuilt.open(dbBuilt.path, dbBuilt.options))
+			() => new modelClass(new (schemaClass)(), db.open(db.path += `-${type}`, db.options))
 		);
 	}
 
