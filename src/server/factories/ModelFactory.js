@@ -31,7 +31,7 @@ export default class ModelFactory {
 		).then(
 			imported => modelClass = imported.default
 		).then(
-			() => new modelClass(new (schemaClass)(), db.open(db.path += `-${type}`, db.options))
+			() => new modelClass(new (schemaClass)(), db.open(db.path + `-${type}`, db.options))
 		);
 	}
 
