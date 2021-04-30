@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import frisby from 'frisby';
 const Joi = frisby.Joi;
 
@@ -23,22 +22,12 @@ import {authRecsValid} from './fixtures/authRecords';
 import {eventRecsValid} from './fixtures/eventRecords';
 import {Server} from 'http';
 import {saltAndHash} from '../lib/Hashword';
-import Route from '../routes/Route';
+import routes from '../apiRoutes';
 
 const freshLimit = 5 * 60 * 1000; // 5 minutes
 const masterUserID = "100";
 const masterClearword = 'hey just testing';
 const port = 3000;
-
-// Order from top to bottom: first match to last
-const routes = [
-	new Route(/^\/api\/events\/?$/i, 'Events'),
-	new Route(/^\/api\/event\/(?<id>[^\/]+?)\/?$/i, 'Event'),
-	new Route(/^\/api\/event\/?$/i, 'Event'),
-	new Route(/^\/api\/auth\/(?<id>[^\/]+?)\/?$/i, 'Auth'),
-	new Route(/^\/api\/auth\/?$/i, 'Auth'),
-	new Route(/^\/api\/?/i, undefined) // discoverability on bad route
-];
 
 let serviceFactory, serviceToAPIResponseMap, controllerFactory, httpServer, server, baseURI;
 
