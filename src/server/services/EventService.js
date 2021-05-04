@@ -67,17 +67,23 @@ export default class EventService extends Service { // FINAL
 	 *
 	 * @param  {Object}         p         Params are wrapped in this object.
 	 * @param  {EventsRecord[]} p.records An EventsRecord with updated fields, wrapped in an array.
+	 * @param  {Number}         p.id      The ID of the event to modify; overrides any ID found p.records.
 	 *
 	 * @return {Promise} The promise resolves with the updated record ID in a SuccessServiceResponse, or an ErrorServiceResponse.
 	 */
-	put({records}){
+	put({records, id}){
 		return this.performAfterSecurityChecks(
 			'put',
-			{records},
+			{records, id},
 			() => {
 				return Promise.resolve(
 				).then(
 					() => this.prepareRecords(EventsRecord, records)
+				).then(
+					eventsRecords => {
+						eventsRecords[0].eventID = parseInt(id, 10);
+						return this.prepareRecords(EventsRecord, eventsRecords);
+					}
 				).then(
 					eventsRecords => records = eventsRecords
 				).then(
@@ -85,9 +91,9 @@ export default class EventService extends Service { // FINAL
 				).then(
 					model => model.update(records[0])
 				).then(
-					data => this.generateSuccess('put', data, {records})
+					data => this.generateSuccess('put', data, {records, id})
 				).catch(
-					e => this.generateError('put', e, {records})
+					e => this.generateError('put', e, {records, id})
 				);
 			}
 		);
