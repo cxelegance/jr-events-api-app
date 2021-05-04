@@ -4,6 +4,7 @@ import atob from 'atob';
 
 import ConfirmAuthorizationError from './errors/ConfirmAuthorizationError';
 import UnauthorizedError from './errors/UnauthorizedError';
+import ReauthenticationRequiredError from './errors/ReauthenticationRequiredError';
 import NoRouteFoundError from './errors/NoRouteFoundError';
 import SuccessServiceResponse from './responses/SuccessServiceResponse';
 import ErrorServiceResponse from './responses/ErrorServiceResponse';
@@ -405,6 +406,7 @@ export default class HTTPServer{
 					const {error} = serviceResponse;
 					this.log.debug({errorString: error.toString()}, 'serviceResponse is not instanceof SuccessServiceResponse');
 					if(error instanceof UnauthorizedError) return error;
+					if(error instanceof ReauthenticationRequiredError) return error;
 					else return new UnauthorizedError('Recommend authenticating first.');
 				}
 			}
