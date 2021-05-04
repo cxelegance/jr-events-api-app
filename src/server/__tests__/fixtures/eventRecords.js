@@ -45,7 +45,7 @@ eventRecsValid.set('shell', new EventsRecord({
 eventRecsValid.set(++nextIndex, new EventsRecord({
 	"eventID": 1,
 	"eventType": "house concert",
-	"displayName": "House Concert–Brasilia Sessions",
+	"displayName": "Brasilia Sessions",
 	"description": "a Brasilia Sessions show",
 	"uri": "http://myshow.com",
 	"startsAt": 100,
@@ -68,10 +68,10 @@ eventRecsValid.set(++nextIndex, new EventsRecord({
  */
 eventRecsValid.set(++nextIndex, new EventsRecord({
 	eventID: 2,
-	eventType: 'house concert',
-	displayName: 'House Concert—Brasilia Sessions',
-	description: 'a Brasilia Sessions show',
-	uri: 'http://myshow.com',
+	eventType: 'concert',
+	displayName: 'Quintal cafe show',
+	description: 'Jesse live in the cafe',
+	uri: 'http://myshow.com/2',
 	startsAt: 100,
 	duration: 10000,
 	timezone: 'Etc/UTC',
@@ -117,7 +117,7 @@ eventRecsValid.set(++nextIndex, new EventsRecord({
 	eventType: 'concert',
 	startsAt: 1,
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert'
+	displayName: 'My big concert 1'
 }));
 
 /*
@@ -139,7 +139,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventType: 'concert',
 	startsAt: 1,
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert'
+	displayName: 'My big concert 2'
 }));
 
 /*
@@ -150,7 +150,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventType: 'concert',
 	startsAt: 1,
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert'
+	displayName: 'My big concert 3'
 }));
 
 /*
@@ -161,7 +161,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventType: 'concert',
 	startsAt: 1,
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert'
+	displayName: 'My big concert 4'
 }));
 
 /*
@@ -171,7 +171,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventID: 1000,
 	startsAt: 1,
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert'
+	displayName: 'My big concert 5'
 }));
 
 /*
@@ -181,7 +181,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventID: 1000,
 	eventType: 'concert',
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert'
+	displayName: 'My big concert 6'
 }));
 
 /*
@@ -191,7 +191,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventID: 1000,
 	eventType: 'concert',
 	startsAt: 1,
-	displayName: 'My big concert'
+	displayName: 'My big concert 7'
 }));
 
 /*
@@ -212,7 +212,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventType: 'concert',
 	startsAt: 1,
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert',
+	displayName: 'My big concert 8',
 	whatIsThis: '?'
 }));
 
@@ -224,7 +224,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventType: 'concert',
 	startsAt: 1,
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert',
+	displayName: 'My big concert 9',
 	whatIsThis: {
 		hey: 'look at me!'
 	}
@@ -238,7 +238,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventType: 'concert',
 	startsAt: 1,
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert',
+	displayName: 'My big concert 10',
 	whatIsThis: 7
 }));
 
@@ -250,7 +250,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventType: 'concert',
 	startsAt: 1,
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert',
+	displayName: 'My big concert 11',
 	whatIsThis: []
 }));
 
@@ -262,7 +262,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventType: 'concert',
 	startsAt: 1,
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert',
+	displayName: 'My big concert 12',
 	whatIsThis: [1, 2, 3]
 }));
 
@@ -274,7 +274,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventType: 'concert',
 	startsAt: 1,
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert',
+	displayName: 'My big concert 13',
 	whatIsThis: ['hi', 'there']
 }));
 
@@ -286,7 +286,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventType: 'concert',
 	startsAt: 1,
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert',
+	displayName: 'My big concert 14',
 	songkickVenue: {
 		lookAtMe: 18
 	}
@@ -300,7 +300,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventType: 'concert',
 	startsAt: {},
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert'
+	displayName: 'My big concert 15'
 }));
 
 /*
@@ -311,7 +311,7 @@ eventRecsInvalid.set(++nextIndex, new EventsRecord({
 	eventType: 'concert',
 	startsAt: {},
 	timezone: 'Etc/UTC',
-	displayName: 'My big concert',
+	displayName: 'My big concert 16',
 	musicianNames: ['Me', 5]
 }));
 
