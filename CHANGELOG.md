@@ -9,7 +9,17 @@ It is maintained in [Markdown](https://www.markdownguide.org/).
 - implement (or ensure implemented) CORS for Express
 - POST /events/ accepts array of multiple records
 - POST or other method to replace all records with array of records
-- remove authToken from Controller::handleRequest()
+
+## [0.3.0] - 2021-05-04
+### Added
+- new test suite via API/frisby that uses a real database
+
+### Changed
+- authentication now includes Bearer for operation after authenticating using Basic
+- improved authtoken handling; removed from Controller::handleRequest()
+- fixed database opener: now opens separate database for each service
+- ensure ReauthenticationRequiredError is thrown when appropriate
+- PUT event now accepts the event ID given as parameter
 
 ## [0.2.3] - 2021-04-08
 ### Added
