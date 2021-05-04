@@ -23,7 +23,7 @@ export default class Service {
 	/** @type {ModelFactory} For building a model when required. */
 	modelFactory;
 
-	/** @type {Object} An instance of the database, for use with a model. */
+	/** @type {Object} A database opener object; has a path to db, some {options}, and an open(path, options) method. */
 	db;
 
 	/** @type {String} Should be at the end of the inheriting class name, e.g. 'v_2' for ChildService_v_2; falsy for v1 of ChildService. */

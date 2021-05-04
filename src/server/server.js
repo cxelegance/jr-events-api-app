@@ -11,7 +11,7 @@ import routes from './apiRoutes';
 const dotenvResult = dotenv.config();
 if(dotenvResult.error && process.env.NODE_ENV !== 'production') throw dotenvResult.error;
 
-const db = {
+const dbOpener = {
 	path: process.env.DB_PATH,
 	options: {
 		compression: process.env.DB_COMPRESSION
@@ -23,7 +23,7 @@ const port = process.env.PORT || process.env.DEV_PORT;
 
 const serviceFactory = new ServiceFactory(
 	modelFactory,
-	db,
+	dbOpener,
 	parseInt(process.env.FRESHLIMIT, 10),
 	process.env.MASTERUSER,
 	process.env.MASTERPASS

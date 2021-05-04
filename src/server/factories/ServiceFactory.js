@@ -9,7 +9,7 @@ export default class ServiceFactory { // FINAL
 	/** @type {ModelFactory} A ModelFactory so that the Service can build models. */
 	modelFactory;
 
-	/** @type {Object} A database object. Update this? */
+	/** @type {Object} A database opener object; has a path to db, some {options}, and an open(path, options) method. */
 	db;
 
 	/** @type {Number} How many milliseconds can transpire before an Authentication record goes stale? */

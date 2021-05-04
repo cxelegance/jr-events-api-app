@@ -12,7 +12,7 @@ export default class ModelFactory {
 	 * @see Model
 	 *
 	 * @param  {String} type    E.g. Auth, Events; prefixes for AuthModel, EventsModel, etc.
-	 * @param  {Object} db      A database object.
+	 * @param  {Object} db      A database opener object; has a path to db, some {options}, and an open(path, options) method.
 	 * @param  {String} version E.g. v2, v3, v4; must match the class naming structure for Services, Models, Schema, etc.
 	 *
 	 * @return {Promise}        Resolves with a newly built model.
