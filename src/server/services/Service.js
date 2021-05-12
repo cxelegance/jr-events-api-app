@@ -148,15 +148,16 @@ export default class Service {
 	 *
 	 * @see #modelType
 	 *
-	 * @param  {Record} recClass       The class of records for preparing the next parameter, 'records'.
-	 * @param  {Array}  [records=null] The records as received from the consumer.
+	 * @param  {Record}  recClass           The class of records for preparing the next parameter, 'records'.
+	 * @param  {Array}   [records=null]     The records as received from the consumer.
+	 * @param  {Boolean} [allowEmpty=false] Is an empty array allowed?
 	 *
 	 * @return {Promise} The promise resolves with an array of Records or rejects with RecordTypeError.
 	 */
-	prepareRecords(recClass, records = null){
+	prepareRecords(recClass, records = null, allowEmpty = false){
 		return new Promise(
 			(resolve, reject) => {
-				if(records && !( Array.isArray(records) && records[0] )){
+				if(!Array.isArray(records) || !allowEmpty && !records.length){
 					reject(new RecordTypeError('provided records should be an array of records, even if only one record in the array.'));
 				}else{
 					let out;
