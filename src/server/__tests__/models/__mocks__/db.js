@@ -9,6 +9,11 @@ class db {
 		this.open = () => this;
 	}
 
+	deleteDB(){
+		this.getReturns(undefined);
+		this.getRangeReturns([]);
+	}
+
 	get(id){}
 
 	remove(id){}

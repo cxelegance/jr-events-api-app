@@ -11,6 +11,7 @@ import {
 	F400ErrorAPIResponse,
 	F401ErrorAPIResponse,
 	AuthF403ErrorAPIResponse,
+	AnyTLSF403ErrorAPIResponse,
 	AuthTLSF403ErrorAPIResponse,
 	EventTLSF403ErrorAPIResponse,
 	EventF404ErrorAPIResponse,
@@ -111,6 +112,7 @@ export default class ServiceToAPIResponseMap extends Map{
 		 * Events Service
 		 */
 		this.set(this.formKey( 'Events', 'get' ), EventsS200Or206SuccessAPIResponse);
+		this.set(this.formKey( 'Events', 'put' ), S200SuccessAPIResponse);
 
 		this.set(this.formKey( 'Events', '*', 'Error'), EventsF500ErrorAPIResponse);
 		this.set(this.formKey( 'Events', '*', 'TypeError'), EventsF500ErrorAPIResponse);
@@ -118,6 +120,7 @@ export default class ServiceToAPIResponseMap extends Map{
 		this.set(this.formKey( 'Events', '*', 'AggregateError'), EventsF500ErrorAPIResponse);
 		this.set(this.formKey( 'Events', '*', 'SyntaxError'), EventsF500ErrorAPIResponse);
 		this.set(this.formKey( 'Events', '*', 'RangeError'), EventsF500ErrorAPIResponse);
+		this.set(this.formKey( 'Events', '*', 'InsecureOperationError' ), AnyTLSF403ErrorAPIResponse);
 
 		this.set(this.formKey( 'Events', 'get', 'NoRecordsFoundError' ), EventsS200Or206SuccessAPIResponse);
 

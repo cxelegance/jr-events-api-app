@@ -694,19 +694,21 @@ describe('HTTPServer returns all expected APIResponses for /api/events', () => {
 		);
 	});
 
-	test('PUT returns 405 Method Not Allowed on ErrorServiceResponse', () => {
+	test('PUT returns 403 Forbidden on InsecureOperationError', () => {
 		return frisby.put(`${baseURI}/api/events`).expect(
 			'header', 'URI', '/api/events'
 		).expect(
 			'header', 'Content-Type', 'application/json; charset=UTF-8'
 		).expect(
-			'status', 405
+			'status', 403
 		).expect(
-			'json', 'code', 405
+			'json', 'code', 403
 		).expect(
-			'json', 'status', 'Method Not Allowed'
+			'json', 'status', 'Forbidden'
 		).expect(
 			'header', 'Allow', 'GET'
+		).expect(
+			'header', 'Allow', 'PUT'
 		).expect(
 			'json', 'links', ['events/']
 		).expect(
@@ -758,7 +760,7 @@ describe('HTTPServer returns all expected APIResponses for /api/events', () => {
 			'header', 'Allow', 'OPTIONS'
 		).expect(
 			'header', 'Allow', 'GET'
-		).expectNot(
+		).expect(
 			'header', 'Allow', 'PUT'
 		).expectNot(
 			'header', 'Allow', 'DELETE'

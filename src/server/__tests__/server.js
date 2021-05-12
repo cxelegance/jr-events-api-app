@@ -443,4 +443,150 @@ describe('basic process for authenticating and getting/modifying events works', 
 		);
 	});
 
+	test('POST event to preload for upcoming test of PUT events/', () => {
+		const recs = [
+			{key: 1, value: eventRecsValid.get(1)}
+		];
+		return frisby.setup({
+			request: {
+				headers: {
+					"Authorization": `Bearer ${bearerString}`,
+					"Content-Type": 'application/json; charset=utf-8'
+				}
+			}
+		}).post(
+			`${baseURI}/api/event`,
+			[recs[0].value]
+		).expect(
+			'header', 'URI', '/api/event'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 201
+		).expect(
+			'json', 'code', 201
+		).expect(
+			'json', 'status', 'Created'
+		).expectNot(
+			'json', 'message', Joi.any()
+		).expect(
+			'json', 'data', 1
+		);
+	});
+
+	test('GET events confirm the new event', () => {
+		const recs = [
+			{key: 1, value: eventRecsValid.get(1)}
+		];
+		return frisby.get(`${baseURI}/api/events`).expect(
+			'header', 'URI', '/api/events'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 200
+		).expect(
+			'json', 'code', 200
+		).expect(
+			'json', 'status', 'OK'
+		).expectNot(
+			'json', 'message', Joi.any()
+		).expect('jsonTypes', 'data[0]',
+			{
+				"eventID": Joi.number(),
+				"displayName": Joi.string()
+			}
+		).expect(
+			'json', 'data[0].eventID', 1
+		).expect(
+			'json', 'data[0].displayName', recs[0].value.displayName
+		);
+	});
+
+	test('PUT events returns an exact array of event IDs as expected', () => {
+		const recs = [
+			{key: 2, value: eventRecsValid.get(2)},
+			{key: 3, value: eventRecsValid.get(3)},
+			{key: 4, value: eventRecsValid.get(4)},
+		];
+		return frisby.setup({
+			request: {
+				headers: {
+					"Authorization": `Bearer ${bearerString}`,
+					"Content-Type": 'application/json; charset=utf-8'
+				}
+			}
+		}).put(
+			`${baseURI}/api/events`,
+			recs.map(rec => rec.value)
+		).expect(
+			'header', 'URI', '/api/events'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 200
+		).expect(
+			'json', 'code', 200
+		).expect(
+			'json', 'status', 'OK'
+		).expectNot(
+			'json', 'message', Joi.any()
+		).expect(
+			'json', 'data[0]', recs[0].value.eventID
+		).expect(
+			'json', 'data[1]', recs[1].value.eventID
+		).expect(
+			'json', 'data[2]', recs[2].value.eventID
+		).expectNot(
+			'jsonTypes', 'data[3]', Joi.any()
+		);
+	});
+
+	test('GET events confirm the new events', () => {
+		const recs = [ // must be same as previous test!
+			{key: 2, value: eventRecsValid.get(2)},
+			{key: 3, value: eventRecsValid.get(3)},
+			{key: 4, value: eventRecsValid.get(4)},
+		];
+		return frisby.get(`${baseURI}/api/events`).expect(
+			'header', 'URI', '/api/events'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 200
+		).expect(
+			'json', 'code', 200
+		).expect(
+			'json', 'status', 'OK'
+		).expectNot(
+			'json', 'message', Joi.any()
+		).expect('jsonTypes', 'data[0]',
+			{
+				"eventID": Joi.number(),
+				"displayName": Joi.string()
+			}
+		).expect(
+			'json', 'data[0].eventID', recs[0].value.eventID
+		).expect(
+			'json', 'data[0].displayName', recs[0].value.displayName
+		).expect('jsonTypes', 'data[1]',
+			{
+				"eventID": Joi.number(),
+				"displayName": Joi.string()
+			}
+		).expect(
+			'json', 'data[1].eventID', recs[1].value.eventID
+		).expect(
+			'json', 'data[1].displayName', recs[1].value.displayName
+		).expect('jsonTypes', 'data[2]',
+			{
+				"eventID": Joi.number(),
+				"displayName": Joi.string()
+			}
+		).expect(
+			'json', 'data[2].eventID', recs[2].value.eventID
+		).expect(
+			'json', 'data[2].displayName', recs[2].value.displayName
+		);
+	});
+
 });

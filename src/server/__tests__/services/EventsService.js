@@ -9,12 +9,13 @@ import ErrorServiceResponse from '../../responses/ErrorServiceResponse';
 import SuccessServiceResponse from '../../responses/SuccessServiceResponse';
 
 import NoRecordsFoundError from '../../errors/NoRecordsFoundError';
+import ConfirmAuthorizationError from '../../errors/ConfirmAuthorizationError';
 
-let eventsService;
-const isSecure = false;
+let eventsService, eventsServiceInsecure;
 
 beforeEach(() => {
-	eventsService = new EventsService(modelFactory, db, isSecure);
+	eventsService = new EventsService(modelFactory, db, true);
+	eventsServiceInsecure = new EventsService(modelFactory, db, false);
 });
 
 describe('eventsService instantiation is correct:', () => {
@@ -49,10 +50,10 @@ describe('eventsService instantiation is correct:', () => {
 describe('get method', () => {
 
 	test('returns ErrorServiceResponse with NoRecordsFoundError', () => {
-		return eventsService.getModel().then(
+		return eventsServiceInsecure.getModel().then(
 			eventsModel => new Promise( resolve => resolve(eventsModel.db.getRangeReturns([])) )
 		).then(
-			() => eventsService.get({})
+			() => eventsServiceInsecure.get({})
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);
@@ -63,16 +64,76 @@ describe('get method', () => {
 
 	test('returns SuccessServiceResponse with records', () => {
 		const recs = [{key: 1, value: eventRecsValid.get(1)}, {key: 2, value: eventRecsValid.get(2)}];
-		return eventsService.getModel().then(
+		return eventsServiceInsecure.getModel().then(
 			eventsModel => new Promise(
 				resolve => resolve(eventsModel.db.getRangeReturns(recs))
 			)
 		).then(
-			() => eventsService.get({})
+			() => eventsServiceInsecure.get({})
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(SuccessServiceResponse);
 				return expect(response.data).toEqual([eventRecsValid.get(1), eventRecsValid.get(2)]);
+			}
+		);
+	});
+
+});
+
+describe('put method', () => {
+
+	test('returns an empty array when given no records, and a get() afterward return no records', () => {
+		return eventsService.put({records: []}).then(
+			response => {
+				expect(response.error).toBeInstanceOf(ConfirmAuthorizationError);
+				return response.error.proceed();
+			}
+		).then(
+			response => {
+				if(response instanceof ErrorServiceResponse) console.log(response);
+				expect(response).toBeInstanceOf(SuccessServiceResponse);
+				return expect(response.data).toEqual([]);
+			}
+		).then(
+			() => eventsService.get({})
+		).then(
+			response => {
+				if(response instanceof SuccessServiceResponse) console.log(response);
+				expect(response).toBeInstanceOf(ErrorServiceResponse);
+				return expect(response.error).toBeInstanceOf(NoRecordsFoundError);
+			}
+		);
+	});
+
+	test('returns an array of ids when given some records', () => {
+		const recs = [
+			{key: 1, value: eventRecsValid.get(1)},
+			{key: 2, value: eventRecsValid.get(2)},
+			{key: 3, value: eventRecsValid.get(3)},
+			{key: 4, value: eventRecsValid.get(4)} // this one has eventID == 1000
+		];
+		return eventsServiceInsecure.getModel().then(
+			eventsModel => new Promise(
+				resolve => {
+					eventsModel.db.putResolves(true);
+					eventsModel.db.getReturns(undefined);
+					resolve();
+				}
+			)
+		).then(
+			() => eventsService.put({records: recs.map( rec => rec.value )})
+		).then(
+			response => {
+				expect(response.error).toBeInstanceOf(ConfirmAuthorizationError);
+				return response.error.proceed();
+			}
+		).then(
+			response => {
+				if(response instanceof ErrorServiceResponse) console.log(response);
+				expect(response).toBeInstanceOf(SuccessServiceResponse);
+				return expect(response.data).toEqual(recs.map(
+					rec => rec.value.eventID
+				));
 			}
 		);
 	});

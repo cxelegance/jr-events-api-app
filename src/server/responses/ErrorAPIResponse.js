@@ -140,6 +140,24 @@ export class TLSF403ErrorAPIResponse extends F403ErrorAPIResponse {
 }
 
 /**
+ * Responsible for creating a new AnyTLSF403ErrorAPIResponse.
+ *
+ * @class
+ * @classdesc A AnyTLSF403ErrorAPIResponse carries data resulting from a forbidden API request.
+ * @extends F403ErrorAPIResponse
+ */
+export class AnyTLSF403ErrorAPIResponse extends (mixin(ErrorCommon, TLSF403ErrorAPIResponse)) {
+
+	constructor(serviceResponse){
+		super(serviceResponse);
+		const {serviceRoute, options} = serviceResponse.get();
+		this.addCommonLinks(serviceRoute);
+		this.addCommonAllowHeader(options);
+	}
+
+}
+
+/**
  * Responsible for creating a new AuthF403ErrorAPIResponse.
  *
  * @class
