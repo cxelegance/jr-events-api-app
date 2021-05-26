@@ -123,4 +123,35 @@ export default class Schema {
 			if(isObject) this.populateDatatypes(rules[field].object);
 		}
 	}
+
+	/**
+	 * Responsible for scanning all root-level rules and validating/confirming that one and only one rule
+	 * has isPrimary set to true; that one rule must have type set to number and isRequired also true;
+	 * intended to be called in implementing class' constructor.
+	 *
+	 * @throws {SchemaValidationTypeError}
+	 *
+	 * @return void
+	 */
+	validatePrimary(){
+		let primaryCount = 0;
+		let isANumber = false;
+		let isRequired = false;
+		for(const [field, fieldRules] of Object.entries(this.rules)){
+			if(fieldRules.isPrimary){
+				primaryCount++;
+				isANumber = fieldRules.type === 'number';
+				isRequired = fieldRules.isRequired || isRequired;
+			}
+		}
+		if(primaryCount !== 1){
+			throw new SchemaValidationTypeError('one and only one root-level field should have isPrimary set to true.');
+		}
+		if(!isANumber){
+			throw new SchemaValidationTypeError('primary field (isPrimary == true) should have \'type\' set to \'number\'.');
+		}
+		if(!isRequired){
+			throw new SchemaValidationTypeError('primary field (isPrimary == true) should have isRequired set to true.');
+		}
+	}
 }

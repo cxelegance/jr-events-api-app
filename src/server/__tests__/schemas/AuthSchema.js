@@ -35,3 +35,41 @@ test('invalid records throw errors', () => {
 		}).toThrow(SchemaValidationTypeError);
 	}
 });
+
+describe('validatePrimary() functions as expected when', () => {
+
+	test('no primary is defined', () => {
+		delete authSchema.rules.authID.isPrimary;
+		expect(() => {
+			authSchema.validatePrimary()
+		}).toThrow(SchemaValidationTypeError);
+	});
+
+	test('more than one primary is defined', () => {
+		authSchema.rules.authToken.isPrimary = true;
+		expect(() => {
+			authSchema.validatePrimary()
+		}).toThrow(SchemaValidationTypeError);
+	});
+
+	test('no isRequired is defined', () => {
+		delete authSchema.rules.authID.isRequired;
+		expect(() => {
+			authSchema.validatePrimary()
+		}).toThrow(SchemaValidationTypeError);
+	});
+
+	test('primary type is not number', () => {
+		authSchema.rules.authID.type = 'string';
+		expect(() => {
+			authSchema.validatePrimary()
+		}).toThrow(SchemaValidationTypeError);
+	});
+
+	test('there is one primary properly defined', () => {
+		expect(() => {
+			authSchema.validatePrimary()
+		}).not.toThrow();
+	});
+
+});

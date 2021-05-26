@@ -58,3 +58,41 @@ test('invalid records throw errors', () => {
 		}).toThrow(SchemaValidationTypeError);
 	}
 });
+
+describe('validatePrimary() functions as expected when', () => {
+
+	test('no primary is defined', () => {
+		delete eventsSchema.rules.eventID.isPrimary;
+		expect(() => {
+			eventsSchema.validatePrimary()
+		}).toThrow(SchemaValidationTypeError);
+	});
+
+	test('more than one primary is defined', () => {
+		eventsSchema.rules.eventType.isPrimary = true;
+		expect(() => {
+			eventsSchema.validatePrimary()
+		}).toThrow(SchemaValidationTypeError);
+	});
+
+	test('no isRequired is defined', () => {
+		delete eventsSchema.rules.eventID.isRequired;
+		expect(() => {
+			eventsSchema.validatePrimary()
+		}).toThrow(SchemaValidationTypeError);
+	});
+
+	test('primary type is not number', () => {
+		eventsSchema.rules.eventID.type = 'string';
+		expect(() => {
+			eventsSchema.validatePrimary()
+		}).toThrow(SchemaValidationTypeError);
+	});
+
+	test('there is one primary properly defined', () => {
+		expect(() => {
+			eventsSchema.validatePrimary()
+		}).not.toThrow();
+	});
+
+});

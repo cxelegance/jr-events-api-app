@@ -11,7 +11,8 @@ export default class EventsSchema extends Schema {
 	rules = {
 		eventID: {
 			type: 'number',
-			isRequired: true
+			isRequired: true,
+			isPrimary: true
 		},
 		eventType: {
 			type: 'string',
@@ -115,6 +116,7 @@ export default class EventsSchema extends Schema {
 
 	constructor(){
 		super();
+		this.validatePrimary();
 		this.datatypes = [];
 		this.populateDatatypes();
 	}

@@ -11,7 +11,8 @@ export default class AuthSchema extends Schema {
 	rules = {
 		authID: {
 			type: 'number',
-			isRequired: true
+			isRequired: true,
+			isPrimary: true
 		},
 		authToken: {
 			type: 'string',
@@ -31,6 +32,7 @@ export default class AuthSchema extends Schema {
 
 	constructor(){
 		super();
+		this.validatePrimary();
 		this.datatypes = [];
 		this.populateDatatypes();
 	}
