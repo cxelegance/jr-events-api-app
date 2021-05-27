@@ -7,6 +7,7 @@ import db from './__mocks__/db';
 
 import SchemaValidationTypeError from '../../errors/SchemaValidationTypeError';
 import RecordExistsError from '../../errors/RecordExistsError';
+import RecordDeletedError from '../../errors/RecordDeletedError';
 import NoRecordsFoundError from '../../errors/NoRecordsFoundError';
 
 
@@ -42,6 +43,20 @@ describe('create method', () => {
 		expect(
 			() => authModel.create({authID: 1})
 		).toThrow(TypeError);
+	});
+
+	test('throws RecordExistsError', () => {
+		authModel.db.getReturns(true);
+		expect(authModel.create(authRecsValid.get(1))).rejects.toThrow(RecordExistsError);
+		authModel.setSoftDelete(true);
+		return expect(authModel.create(null, 1)).rejects.toThrow(RecordExistsError);
+	});
+
+	test('throws RecordDeletedError as expected', () => {
+		authModel.db.getReturns(null);
+		authModel.setSoftDelete(true);
+		expect(authModel.create(null, 1)).rejects.toThrow(RecordDeletedError);
+		return expect(authModel.create(authRecsValid.get(1))).rejects.toThrow(RecordDeletedError);
 	});
 
 });

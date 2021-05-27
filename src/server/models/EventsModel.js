@@ -14,11 +14,20 @@ export default class EventsModel extends Model {
 	 *
 	 * @see Model#create
 	 *
+	 * @throws {Error}
 	 * @throws {TypeError}
 	 */
 	create(record, id = null){
-		if(!(record instanceof EventsRecord)) throw new TypeError('record provided is not an EventsRecord.');
-		if(id === null) id = record.eventID;
+		if(this.getSoftDelete() && record === null && id === null){
+			throw new Error('create received a null record with no ID');
+		}
+		if(
+			!(record instanceof EventsRecord) &&
+			(!this.getSoftDelete() || this.getSoftDelete && record !== null)
+		){
+			throw new TypeError('record provided is not an EventsRecord');
+		}
+		if(id === null && record instanceof EventsRecord) id = record.eventID;
 		return super.create(record, id);
 	}
 

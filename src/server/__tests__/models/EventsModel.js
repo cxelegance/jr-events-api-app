@@ -7,6 +7,7 @@ import db from './__mocks__/db';
 
 import SchemaValidationTypeError from '../../errors/SchemaValidationTypeError';
 import RecordExistsError from '../../errors/RecordExistsError';
+import RecordDeletedError from '../../errors/RecordDeletedError';
 import NoRecordsFoundError from '../../errors/NoRecordsFoundError';
 
 
@@ -46,7 +47,16 @@ describe('create method', () => {
 
 	test('throws RecordExistsError', () => {
 		eventsModel.db.getReturns(true);
-		return expect(eventsModel.create(eventRecsValid.get(1))).rejects.toThrow(RecordExistsError);
+		expect(eventsModel.create(eventRecsValid.get(1))).rejects.toThrow(RecordExistsError);
+		eventsModel.setSoftDelete(true);
+		return expect(eventsModel.create(null, 1)).rejects.toThrow(RecordExistsError);
+	});
+
+	test('throws RecordDeletedError as expected', () => {
+		eventsModel.db.getReturns(null);
+		eventsModel.setSoftDelete(true);
+		expect(eventsModel.create(null, 1)).rejects.toThrow(RecordDeletedError);
+		return expect(eventsModel.create(eventRecsValid.get(1))).rejects.toThrow(RecordDeletedError);
 	});
 
 	test('throws Error', () => {
@@ -91,6 +101,12 @@ describe('update method', () => {
 		return expect(eventsModel.update(eventRecsValid.get(3))).rejects.toThrow(NoRecordsFoundError);
 	});
 
+	test('throws RecordDeletedError as expected', () => {
+		eventsModel.db.getReturns(null);
+		eventsModel.setSoftDelete(true);
+		return expect(eventsModel.update(eventRecsValid.get(1))).rejects.toThrow(RecordDeletedError);
+	});
+
 	test('throws Error', () => {
 		eventsModel.db.getReturns(true);
 		eventsModel.db.putResolves(false);
@@ -123,6 +139,12 @@ describe('read method', () => {
 		return expect(eventsModel.read(1)).resolves.toEqual([goodRec]);
 	});
 
+	test('resolves with no nulls when soft deleting', () => {
+		eventsModel.setSoftDelete(true);
+		eventsModel.db.getRangeReturns([{key: 2, value: eventRecsValid.get(2)}, {key: 3, value: null}, {key: 1, value: eventRecsValid.get(1)}]);
+		return expect(eventsModel.read(1, 10000)).resolves.toEqual([eventRecsValid.get(2), eventRecsValid.get(1)]);
+	});
+
 });
 
 describe('delete method', () => {
@@ -130,6 +152,12 @@ describe('delete method', () => {
 	test('throws NoRecordsFoundError', () => {
 		eventsModel.db.getReturns(undefined);
 		return expect(eventsModel.delete(0)).rejects.toThrow(NoRecordsFoundError);
+	});
+
+	test('throws RecordDeletedError as expected', () => {
+		eventsModel.db.getReturns(null);
+		eventsModel.setSoftDelete(true);
+		return expect(eventsModel.delete(eventRecsValid.get(1).eventID)).rejects.toThrow(RecordDeletedError);
 	});
 
 	test('throws Error', () => {

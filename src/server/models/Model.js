@@ -1,4 +1,5 @@
 import RecordExistsError from '../errors/RecordExistsError';
+import RecordDeletedError from '../errors/RecordDeletedError';
 import NoRecordsFoundError from '../errors/NoRecordsFoundError';
 import BadRangeError from '../errors/BadRangeError';
 
@@ -16,6 +17,9 @@ export default class Model {
 	/** @type {Object} Provides CRUD-like methods for the database containing the corresponding table. */
 	db;
 
+	/** @type {Boolean} True for soft deletion, i.e., record is NULL, or false for real deletion. */
+	#isSoftDelete;
+
 	/**
 	 * @param {Schema} schema An instance of Schema that describes a table in the database.
 	 * @param {Object} db     Provides CRUD-like methods for the database containing the corresponding table.
@@ -26,6 +30,7 @@ export default class Model {
 		}
 		this.schema = schema;
 		this.db = db;
+		this.#isSoftDelete = false;
 	}
 
 	/**
@@ -34,13 +39,14 @@ export default class Model {
 	 * @param  {Record} record    A valid Record object.
 	 * @param  {Number} [id=null] An optional ID; the ID can be ascertained from the Record object in the inheriting class.
 	 *
-	 * @return {Promise}          Resolves with the record ID; rejects with a RecordExistsError.
+	 * @return {Promise}          Resolves with the record ID; rejects with a RecordExistsError or RecordDeletedError.
 	 */
 	create(record, id = null){
-		this.schema.validateRecord(record);
+		if(!this.#isSoftDelete || record !== null) this.schema.validateRecord(record);
 		return new Promise(
 			(resolve, reject) => {
-				if(this.db.get(id) !== undefined) reject(new RecordExistsError(`A record already exists with id ${id}.`));
+				if(this.#isSoftDelete && this.db.get(id) === null) reject(new RecordDeletedError(`A soft-deleted record already exists with id ${id}.`));
+				else if(this.db.get(id) !== undefined) reject(new RecordExistsError(`A record already exists with id ${id}.`));
 				else{
 					this.db.put(id, record).then(
 						isPut => {
@@ -61,14 +67,14 @@ export default class Model {
 	 * @param  {Number} start      The ID of the record or the starting ID for a range of records.
 	 * @param  {Number} [end=null] The ending ID for a range of records.
 	 *
-	 * @throws TypeError
-	 * @throws BadRangeError
+	 * @throws {TypeError}
+	 * @throws {BadRangeError}
 	 *
 	 * @return {Promise}           Resolves with Records[]; rejects with NoRecordsFoundError.
 	 */
 	read(start, end = null){
 		const out = [];
-		let inclusiveEnd;
+		let inclusiveEnd, hasEncounteredNull = false;
 		if(end === null) end = undefined;
 		if(typeof start != 'number') throw new TypeError('read() expects start to be a number.');
 		if(end !== undefined && typeof end != 'number') throw new TypeError('read() expects end to be a number.');
@@ -81,12 +87,20 @@ export default class Model {
 				this.db.getRange(
 					{start, end: inclusiveEnd || end}
 				).filter(
-					({key, value}) => value !== undefined
+					({key, value}) => {
+						hasEncounteredNull = hasEncounteredNull || (this.#isSoftDelete && value === null);
+						return value !== undefined && (!this.#isSoftDelete || value !== null);
+					}
 				).forEach(
 					({value}) => out.push(value)
 				);
-				if(!out.length) reject(new NoRecordsFoundError(`No records found for start = ${start} and end = ${end}.`));
-				else resolve(out);
+				if(!out.length && !end && hasEncounteredNull){
+					reject(new RecordDeletedError(`Record has been soft deleted; id: ${start}.`));
+				}else if(!out.length){
+					reject(new NoRecordsFoundError(`No records found for start = ${start} and end = ${end}.`));
+				}else{
+					resolve(out);
+				}
 			}
 		);
 	}
@@ -97,13 +111,14 @@ export default class Model {
 	 * @param  {Record} record    A valid Record object.
 	 * @param  {Number} [id=null] An optional ID; the ID can be ascertained from the Record object in the inheriting class.
 	 *
-	 * @return {Promise}          Resolves with the record ID; rejects with NoRecordsFoundError.
+	 * @return {Promise}          Resolves with the record ID; rejects with NoRecordsFoundError or RecordDeletedError.
 	 */
 	update(record, id = null){
-		this.schema.validateRecord(record);
+		if(!this.#isSoftDelete || record !== null) this.schema.validateRecord(record);
 		return new Promise(
 			(resolve, reject) => {
-				if(this.db.get(id) === undefined) reject(new NoRecordsFoundError(`No record found with id ${id}.`));
+				if(this.#isSoftDelete && this.db.get(id) === null) reject(new RecordDeletedError(`Record has been soft deleted; id: ${id}.`));
+				else if(this.db.get(id) === undefined) reject(new NoRecordsFoundError(`No record found with id ${id}.`));
 				else{
 					this.db.put(id, record).then(
 						isPut => {
@@ -128,8 +143,18 @@ export default class Model {
 	delete(id){
 		return new Promise(
 			(resolve, reject) => {
-				if(this.db.get(id) === undefined) reject(new NoRecordsFoundError(`No record found with id ${id}.`));
-				else{
+				if(this.#isSoftDelete && this.db.get(id) === null) reject(new RecordDeletedError(`Record has already been soft deleted; id: ${id}.`));
+				else if(this.db.get(id) === undefined) reject(new NoRecordsFoundError(`No record found with id ${id}.`));
+				else if(this.#isSoftDelete){
+					this.db.put(id, null).then(
+						isPut => {
+							if(!isPut) reject(new Error(`Database failed to soft delete record with id ${id}.`));
+							else resolve(id);
+						}
+					).catch(
+						e => reject(e)
+					);
+				}else{
 					this.db.remove(id).then(
 						isDeleted => {
 							if(!isDeleted) reject(new Error(`Database failed to delete record with id ${id}.`));
@@ -141,6 +166,31 @@ export default class Model {
 				}
 			}
 		);
+	}
+
+	/**
+	 * Responsible for setting private property #isSoftDelete.
+	 *
+	 * @param {Boolean} [isSoftDelete=false] Set to true for soft deletion of records by way of setting to null; false is default.
+	 *
+	 * @see #isSoftDelete
+	 *
+	 * @return void
+	 */
+	setSoftDelete(isSoftDelete = false){
+		if(typeof isSoftDelete != 'boolean') throw new TypeError(`setSoftDelete expects a boolean; received: ${isSoftDelete}`);
+		this.#isSoftDelete = isSoftDelete;
+	}
+
+	/**
+	 * Responsible for getting private property #isSoftDelete.
+	 *
+	 * @see #isSoftDelete
+	 *
+	 * @return {Boolean}
+	 */
+	getSoftDelete(){
+		return this.#isSoftDelete;
 	}
 }
 
