@@ -75,8 +75,11 @@ export class EventsS200SuccessAPIResponse extends S200SuccessAPIResponse {
 	constructor(serviceResponse){
 		super(serviceResponse);
 		this.headers.push(
-			{name: 'Allow', value: 'GET'}
+			{name: 'Allow', value: 'GET, PUT, OPTIONS'}
 		);
+		if(!this.links.includes(`events/`)){
+			this.links.push(`events/`);
+		}
 		if(!this.links.includes(`event/1`)){
 			this.links.push(`event/1`);
 		}
@@ -195,7 +198,7 @@ export class EventsS206SuccessAPIResponse extends S206SuccessAPIResponse {
 	constructor(serviceResponse){
 		super(serviceResponse);
 		this.headers.push(
-			{name: 'Allow', value: 'GET'}
+			{name: 'Allow', value: 'GET, PUT'}
 		);
 	}
 

@@ -718,6 +718,43 @@ describe('HTTPServer returns all expected APIResponses for /api/events', () => {
 		);
 	});
 
+	test('PUT returns 200 for a new set of events provided', () => {
+		const recs = [
+			{key: 1, value: eventRecsValid.get(1)},
+			{key: 2, value: eventRecsValid.get(4)}
+		];
+		httpServer.setFakeSecure(true);
+		httpServer.setFakeAuthorized(true);
+		db.getReturns(null);
+		db.putResolves(true);
+		return frisby.put(
+			`${baseURI}/api/events/`,
+			recs.map( rec => rec.value )
+		).expect(
+			'header', 'URI', '/api/events'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 200
+		).expect(
+			'json', 'code', 200
+		).expect(
+			'json', 'status', 'OK'
+		).expect(
+			'header', 'Allow', 'GET'
+		).expect(
+			'header', 'Allow', 'PUT'
+		).expect(
+			'header', 'Allow', 'OPTIONS'
+		).expect(
+			'json', 'links', ['events/', 'event/1']
+		).expectNot(
+			'jsonTypes', 'message', Joi.any()
+		).expect(
+			'json', 'data', [1,2,3,4,5,6,7,8,9,10]
+		);
+	});
+
 	test('DELETE returns 405 Method Not Allowed on ErrorServiceResponse', () => {
 		return frisby.delete(`${baseURI}/api/events`).expect(
 			'header', 'URI', '/api/events'
@@ -1076,7 +1113,7 @@ describe('HTTPServer returns all expected APIResponses for /api/event', () => {
 		).expect(
 			'json', 'links', ['event/1']
 		).expect(
-			'json', 'message', 'Error: Database failed to update record with id 1000.'
+			'json', 'message', 'Error: Database failed to update record with id 10.'
 		).expectNot(
 			'json', 'data', Joi.any()
 		);
@@ -1279,10 +1316,10 @@ describe('HTTPServer returns all expected APIResponses for /api/event', () => {
 		const recs = [
 			{key: 1, value: eventRecsValid.get(4)}
 		];
-		const nextID = 1001;
+		const nextID = 11;
 		httpServer.setFakeSecure(true);
 		httpServer.setFakeAuthorized(true);
-		db.getRangeReturns(recs); // rec 4 has ID of 1000, so the next ID will be 1001
+		db.getRangeReturns(recs); // rec 4 has ID of 10, so the next ID will be 11
 		db.getReturns(undefined);
 		db.putResolves(true);
 		return frisby.post(
@@ -1466,12 +1503,12 @@ describe('HTTPServer returns all expected APIResponses for /api/event', () => {
 		);
 	});
 
-	test('DELETE returns 500 Internal Server Error on ErrorServiceResponse with Error', () => {
+	test('DELETE returns 500 Internal Server Error on ErrorServiceResponse with Error: Database failed to soft delete.', () => {
 		const myID = 99;
 		httpServer.setFakeSecure(true);
 		httpServer.setFakeAuthorized(true);
 		db.getReturns(true);
-		db.removeResolves(false);
+		db.putResolves(false);
 		return frisby.delete(
 			`${baseURI}/api/event/${myID}`
 		).expect(
@@ -1497,18 +1534,18 @@ describe('HTTPServer returns all expected APIResponses for /api/event', () => {
 		).expect(
 			'json', 'links', [`event/1`]
 		).expect(
-			'json', 'message', `Error: Database failed to delete record with id ${myID}.`
+			'json', 'message', `Error: Database failed to soft delete record with id ${myID}.`
 		).expectNot(
 			'json', 'data', Joi.any()
 		);
 	});
 
-	test('DELETE returns 500 Internal Server Error on ErrorServiceResponse with Error', () => {
+	test('DELETE returns 500 Internal Server Error on ErrorServiceResponse with Error: unexpected.', () => {
 		const myID = 99;
 		httpServer.setFakeSecure(true);
 		httpServer.setFakeAuthorized(true);
 		db.getReturns(true);
-		db.removeRejects(new Error('This is an unexpected error.'));
+		db.putRejects(new Error('This is an unexpected error.'));
 		return frisby.delete(
 			`${baseURI}/api/event/${myID}`
 		).expect(
@@ -1545,7 +1582,7 @@ describe('HTTPServer returns all expected APIResponses for /api/event', () => {
 		httpServer.setFakeSecure(true);
 		httpServer.setFakeAuthorized(true);
 		db.getReturns(true);
-		db.removeResolves(true);
+		db.putResolves(true);
 		return frisby.delete(
 			`${baseURI}/api/event/${myID}`
 		).expect(

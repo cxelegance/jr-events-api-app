@@ -5,11 +5,13 @@ import {
 	AuthS201SuccessAPIResponse,
 	S204SuccessAPIResponse,
 	EventsS200Or206SuccessAPIResponse,
+	EventsS200SuccessAPIResponse
 } from '../responses/SuccessAPIResponse';
 import {
 	F204ErrorAPIResponse,
 	F400ErrorAPIResponse,
 	F401ErrorAPIResponse,
+	F410ErrorAPIResponse,
 	AuthF403ErrorAPIResponse,
 	AnyTLSF403ErrorAPIResponse,
 	AuthTLSF403ErrorAPIResponse,
@@ -88,6 +90,11 @@ export default class ServiceToAPIResponseMap extends Map{
 		this.set(this.formKey( '*', '*', 'BadRangeError' ), F416ErrorAPIResponse);
 
 		/*
+		 * Deleted records
+		 */
+		this.set(this.formKey( '*', '*', 'RecordDeletedError' ), F410ErrorAPIResponse);
+
+		/*
 		 * Auth Service
 		 */
 		this.set(this.formKey( 'Auth', 'get' ), AuthF403ErrorAPIResponse);
@@ -112,7 +119,7 @@ export default class ServiceToAPIResponseMap extends Map{
 		 * Events Service
 		 */
 		this.set(this.formKey( 'Events', 'get' ), EventsS200Or206SuccessAPIResponse);
-		this.set(this.formKey( 'Events', 'put' ), S200SuccessAPIResponse);
+		this.set(this.formKey( 'Events', 'put' ), EventsS200SuccessAPIResponse);
 
 		this.set(this.formKey( 'Events', '*', 'Error'), EventsF500ErrorAPIResponse);
 		this.set(this.formKey( 'Events', '*', 'TypeError'), EventsF500ErrorAPIResponse);

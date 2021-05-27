@@ -113,7 +113,7 @@ eventRecsValid.set(++nextIndex, new EventsRecord({
  * Just the minimum required fields
  */
 eventRecsValid.set(++nextIndex, new EventsRecord({
-	eventID: 1000,
+	eventID: 10,
 	eventType: 'concert',
 	startsAt: 1,
 	timezone: 'Etc/UTC',

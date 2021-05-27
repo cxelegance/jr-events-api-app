@@ -215,6 +215,24 @@ export class EventTLSF403ErrorAPIResponse extends (mixin(ErrorCommon, TLSF403Err
 }
 
 /**
+ * Responsible for creating a new F410ErrorAPIResponse.
+ *
+ * @class
+ * @classdesc An F410ErrorAPIResponse carries data resulting from a failed API request.
+ * @extends ErrorAPIResponse
+ */
+export class F410ErrorAPIResponse extends ErrorAPIResponse {
+
+	constructor(serviceResponse){
+		super(serviceResponse);
+		this.code = 410;
+		this.status = 'Gone';
+		this.data = null;
+	}
+
+}
+
+/**
  * Responsible for creating a new F404ErrorAPIResponse.
  *
  * @class
