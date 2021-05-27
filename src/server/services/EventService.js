@@ -1,6 +1,9 @@
 import Service from './Service';
 import EventsRecord from '../records/EventsRecord';
 import BadParameterError from '../errors/BadParameterError';
+import NoRecordsFoundError from '../errors/NoRecordsFoundError';
+import RecordExistsError from '../errors/RecordExistsError';
+import RecordDeletedError from '../errors/RecordDeletedError';
 import SchemaValidationTypeError from '../errors/SchemaValidationTypeError';
 
 /**
@@ -20,6 +23,7 @@ export default class EventService extends Service { // FINAL
 		}
 		this.secureMethods.push('put', 'post', 'delete');
 		this.allMethods.push('get', 'put', 'post', 'delete');
+		this.isSoftDelete = true;
 	}
 
 	/**
@@ -90,6 +94,11 @@ export default class EventService extends Service { // FINAL
 					() => this.getModel()
 				).then(
 					model => model.update(records[0])
+				).catch(
+					e => {
+						if(e instanceof RecordDeletedError) throw new NoRecordsFoundError(`No record found with id ${id}.`);
+						throw e;
+					}
 				).then(
 					data => this.generateSuccess('put', data, {records, id})
 				).catch(
@@ -143,6 +152,12 @@ export default class EventService extends Service { // FINAL
 					() => this.getModel()
 				).then(
 					model => model.create(records[0])
+				).catch(
+					e => {
+						if(e instanceof RecordDeletedError) throw new Error(`Soft deleted: trouble saving with newly created ID: ${records[0].eventID}.`);
+						if(e instanceof RecordExistsError) throw new Error(`trouble saving with newly created ID: ${records[0].eventID}.`);
+						throw e;
+					}
 				).then(
 					id => {
 						this.setNextId(id + 1);
@@ -178,6 +193,11 @@ export default class EventService extends Service { // FINAL
 					() => this.getModel()
 				).then(
 					model => model.delete(id)
+				).catch(
+					e => {
+						if(e instanceof RecordDeletedError) throw new NoRecordsFoundError(`No record found with id ${id}.`);
+						throw e;
+					}
 				).then(
 					data => this.generateSuccess('delete', data, {id})
 				).catch(

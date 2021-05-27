@@ -264,7 +264,7 @@ describe.only('post method', () => {
 		);
 	});
 
-	test.only('returns ErrorServiceResponse with RecordExistsError', () => {
+	test('returns ErrorServiceResponse with Error when RecordExistsError is caught', () => {
 		return eventService.getModel().then(
 			eventsModel => new Promise(
 				resolve => {
@@ -288,12 +288,44 @@ describe.only('post method', () => {
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);
-				return expect(response.error).toBeInstanceOf(RecordExistsError);
+				expect(response.error.toString()).toBe('Error: trouble saving with newly created ID: 1.');
+				return expect(response.error).toBeInstanceOf(Error);
 			}
 		);
 	});
 
-	test('returns ErrorServiceResponse with Error', () => {
+	test('returns ErrorServiceResponse with Error when RecordDeletedError is caught', () => {
+		eventService.isSoftDelete = true;
+		return eventService.getModel().then(
+			eventsModel => new Promise(
+				resolve => {
+					eventsModel.db.getReturns(null)
+					eventsModel.db.getRangeReturns(recs)
+					resolve();
+				}
+			)
+		).then(
+			() => {
+				const recNoID = eventRecsValid.get(3);
+				delete recNoID.eventID;
+				return eventService.post({ records: [recNoID] })
+			}
+		).then(
+			response => {
+				expect(response).toBeInstanceOf(ErrorServiceResponse);
+				expect(response.error).toBeInstanceOf(ConfirmAuthorizationError);
+				return response.error.proceed();
+			}
+		).then(
+			response => {
+				expect(response).toBeInstanceOf(ErrorServiceResponse);
+				expect(response.error.toString()).toBe('Error: Soft deleted: trouble saving with newly created ID: 1.');
+				return expect(response.error).toBeInstanceOf(Error);
+			}
+		);
+	});
+
+	test('returns ErrorServiceResponse with Error because database failed to put', () => {
 		return eventService.getModel().then(
 			eventsModel => new Promise(
 				resolve => {
@@ -304,10 +336,17 @@ describe.only('post method', () => {
 				}
 			)
 		).then(
-			() => eventService.post({ event: eventRecsValid.get(3) })
+			() => eventService.post({ records: [eventRecsValid.get(3)] })
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);
+				expect(response.error).toBeInstanceOf(ConfirmAuthorizationError);
+				return response.error.proceed();
+			}
+		).then(
+			response => {
+				expect(response).toBeInstanceOf(ErrorServiceResponse);
+				expect (response.error.toString()).toBe('Error: Database failed to create record with id 1');
 				return expect(response.error).toBeInstanceOf(Error);
 			}
 		);
@@ -334,7 +373,7 @@ describe.only('post method', () => {
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(SuccessServiceResponse);
-				return expect(response.data).toBe(3);
+				return expect(response.data).toBe(1);
 			}
 		);
 	});

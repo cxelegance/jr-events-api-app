@@ -18,6 +18,7 @@ export default class EventsService extends Service { // FINAL
 		}
 		this.secureMethods.push('put');
 		this.allMethods.push('get', 'put');
+		this.isSoftDelete = true;
 	}
 
 	/**
@@ -70,12 +71,18 @@ export default class EventsService extends Service { // FINAL
 						model.db.deleteDB(); // https://github.com/DoctorEvidence/lmdb-store/blob/master/src/node-lmdb.h#L641
 					}
 				).then(
+					() => {
+						if(this.isSoftDelete){
+							records = this.nullStuffRecords(records, 'eventID');
+						}
+					}
+				).then(
 					() => this.getModel()
 				).then(
 					model => {
 						const allPromises = [];
 						records.forEach(
-							rec => allPromises.push( model.create(rec) )
+							rec => allPromises.push(model.create( rec.isNullStuffed ? null : rec, rec.eventID ))
 						);
 						return Promise.all(allPromises);
 					}

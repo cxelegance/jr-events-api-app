@@ -22,15 +22,20 @@ describe('eventsService instantiation is correct:', () => {
 
 	test('is an instance of EventService and Service', () => {
 		expect(eventsService instanceof EventsService).toBe(true);
-		expect(eventsService instanceof Service).toBe(true);
+		return expect(eventsService instanceof Service).toBe(true);
 	});
 
 	test('modelType property is built correctly', () => {
-		expect(eventsService.modelType).toBe('Events');
+		return expect(eventsService.modelType).toBe('Events');
 	});
 
 	test('modelFactory property is built correctly', () => {
 		return eventsService.getModel().then(
+			model => {
+				expect(model.getSoftDelete()).toBe(true);
+				return model;
+			}
+		).then(
 			model => model instanceof EventsModel
 		).then(
 			isEventsModel => expect(isEventsModel).toBe(true)
@@ -38,11 +43,166 @@ describe('eventsService instantiation is correct:', () => {
 	});
 
 	test('generateError returns ErrorServiceResponse', () => {
-		expect(eventsService.generateError() instanceof ErrorServiceResponse).toBe(true);
+		return expect(eventsService.generateError() instanceof ErrorServiceResponse).toBe(true);
 	});
 
 	test('generateSuccess returns SuccessServiceResponse', () => {
-		expect(eventsService.generateSuccess() instanceof SuccessServiceResponse).toBe(true);
+		return expect(eventsService.generateSuccess() instanceof SuccessServiceResponse).toBe(true);
+	});
+
+});
+
+describe('nullStuffRecords inherited method', () => {
+
+	test('throws Error when soft deletion is not enabled', () => {
+		eventsService.isSoftDelete = false;
+		return expect(() => {
+			eventsService.nullStuffRecords([], 'eventID')
+		}).toThrow(Error);
+	});
+
+	test('returns just nullStuffed objects when receiving just nulls', () => {
+		const isNullStuffed = true;
+		return expect(
+			eventsService.nullStuffRecords([null, null, null], 'eventID')
+		).toEqual([
+			{isNullStuffed, eventID: 1},
+			{isNullStuffed, eventID: 2},
+			{isNullStuffed, eventID: 3}
+		]);
+	});
+
+	test('returns just real records when receiving just real consecutive records', () => {
+		const isNullStuffed = true;
+		return expect(
+			eventsService.nullStuffRecords([eventRecsValid.get(1), eventRecsValid.get(2), eventRecsValid.get(3)], 'eventID')
+		).toEqual([
+			eventRecsValid.get(1),
+			eventRecsValid.get(2),
+			eventRecsValid.get(3)
+		]);
+	});
+
+	test('returns real records with nulls in between', () => {
+		const isNullStuffed = true;
+		return expect(
+			eventsService.nullStuffRecords(
+				[
+					eventRecsValid.get(1),
+					eventRecsValid.get(2),
+					eventRecsValid.get(3),
+					eventRecsValid.get(4) // eventID is 10
+				], 'eventID'
+			)
+		).toEqual([
+			eventRecsValid.get(1),
+			eventRecsValid.get(2),
+			eventRecsValid.get(3),
+			{isNullStuffed, eventID: 4},
+			{isNullStuffed, eventID: 5},
+			{isNullStuffed, eventID: 6},
+			{isNullStuffed, eventID: 7},
+			{isNullStuffed, eventID: 8},
+			{isNullStuffed, eventID: 9},
+			eventRecsValid.get(4) // eventID is 10
+		]);
+	});
+
+	test('returns real records with nulls on outside', () => {
+		const isNullStuffed = true;
+		expect(
+			eventsService.nullStuffRecords(
+				[
+					null,
+					eventRecsValid.get(2),
+					eventRecsValid.get(3),
+					null
+				], 'eventID'
+			)
+		).toEqual([
+			{isNullStuffed, eventID: 1},
+			eventRecsValid.get(2),
+			eventRecsValid.get(3),
+			{isNullStuffed, eventID: 4}
+		]);
+		expect(
+			eventsService.nullStuffRecords(
+				[
+					eventRecsValid.get(1),
+					eventRecsValid.get(2),
+					eventRecsValid.get(3),
+					null
+				], 'eventID'
+			)
+		).toEqual([
+			eventRecsValid.get(1),
+			eventRecsValid.get(2),
+			eventRecsValid.get(3),
+			{isNullStuffed, eventID: 4}
+		]);
+		return expect(
+			eventsService.nullStuffRecords(
+				[
+					eventRecsValid.get(2),
+					eventRecsValid.get(3),
+					null
+				], 'eventID'
+			)
+		).toEqual([
+			{isNullStuffed, eventID: 1},
+			eventRecsValid.get(2),
+			eventRecsValid.get(3),
+			{isNullStuffed, eventID: 4}
+		]);
+	});
+
+	test('returns real records with nulls inside and outside', () => {
+		const isNullStuffed = true;
+		expect(
+			eventsService.nullStuffRecords(
+				[
+					null,
+					eventRecsValid.get(2),
+					null,
+					eventRecsValid.get(4),
+					null
+				], 'eventID'
+			)
+		).toEqual([
+			{isNullStuffed, eventID: 1},
+			eventRecsValid.get(2),
+			{isNullStuffed, eventID: 3},
+			{isNullStuffed, eventID: 4},
+			{isNullStuffed, eventID: 5},
+			{isNullStuffed, eventID: 6},
+			{isNullStuffed, eventID: 7},
+			{isNullStuffed, eventID: 8},
+			{isNullStuffed, eventID: 9},
+			eventRecsValid.get(4),
+			{isNullStuffed, eventID: 11}
+		]);
+		return expect(
+			eventsService.nullStuffRecords(
+				[
+					eventRecsValid.get(2),
+					null,
+					eventRecsValid.get(4),
+					null
+				], 'eventID'
+			)
+		).toEqual([
+			{isNullStuffed, eventID: 1},
+			eventRecsValid.get(2),
+			{isNullStuffed, eventID: 3},
+			{isNullStuffed, eventID: 4},
+			{isNullStuffed, eventID: 5},
+			{isNullStuffed, eventID: 6},
+			{isNullStuffed, eventID: 7},
+			{isNullStuffed, eventID: 8},
+			{isNullStuffed, eventID: 9},
+			eventRecsValid.get(4),
+			{isNullStuffed, eventID: 11}
+		]);
 	});
 
 });
@@ -83,6 +243,16 @@ describe('get method', () => {
 describe('put method', () => {
 
 	test('returns an empty array when given no records, and a get() afterward return no records', () => {
+		return eventsServiceInsecure.getModel().then(
+			eventsModel => new Promise(
+				resolve => {
+					eventsModel.db.putResolves(true);
+					resolve(eventsModel);
+				}
+			)
+		).then(
+			eventsModel => expect(eventsModel.getSoftDelete()).toBe(true)
+		)
 		return eventsService.put({records: []}).then(
 			response => {
 				expect(response.error).toBeInstanceOf(ConfirmAuthorizationError);
@@ -106,20 +276,24 @@ describe('put method', () => {
 	});
 
 	test('returns an array of ids when given some records', () => {
+		eventsService.isSoftDelete = false;
+		eventsServiceInsecure.isSoftDelete = false;
 		const recs = [
 			{key: 1, value: eventRecsValid.get(1)},
 			{key: 2, value: eventRecsValid.get(2)},
 			{key: 3, value: eventRecsValid.get(3)},
-			{key: 4, value: eventRecsValid.get(4)} // this one has eventID == 1000
+			{key: 4, value: eventRecsValid.get(4)}
 		];
 		return eventsServiceInsecure.getModel().then(
 			eventsModel => new Promise(
 				resolve => {
 					eventsModel.db.putResolves(true);
 					eventsModel.db.getReturns(undefined);
-					resolve();
+					resolve(eventsModel);
 				}
 			)
+		).then(
+			eventsModel => expect(eventsModel.getSoftDelete()).toBe(false)
 		).then(
 			() => eventsService.put({records: recs.map( rec => rec.value )})
 		).then(
@@ -134,6 +308,45 @@ describe('put method', () => {
 				return expect(response.data).toEqual(recs.map(
 					rec => rec.value.eventID
 				));
+			}
+		);
+	});
+
+	test('returns an array of ids plus null-stuffed ids when given some records', () => {
+		const recs = [
+			{key: 1, value: eventRecsValid.get(1)},
+			{key: 2, value: eventRecsValid.get(2)},
+			{key: 3, value: eventRecsValid.get(3)},
+			{key: 4, value: eventRecsValid.get(4)}
+		];
+		return eventsServiceInsecure.getModel().then(
+			eventsModel => new Promise(
+				resolve => {
+					eventsModel.db.putResolves(true);
+					eventsModel.db.getReturns(undefined);
+					resolve(eventsModel);
+				}
+			)
+		).then(
+			eventsModel => expect(eventsModel.getSoftDelete()).toBe(true)
+		).then(
+			() => eventsService.put({records: recs.map( rec => rec.value )})
+		).then(
+			response => {
+				expect(response.error).toBeInstanceOf(ConfirmAuthorizationError);
+				return response.error.proceed();
+			}
+		).then(
+			response => {
+				if(response instanceof ErrorServiceResponse) console.log(response);
+				expect(response).toBeInstanceOf(SuccessServiceResponse);
+				return expect(response.data).toEqual([
+					recs[0].value.eventID,
+					recs[1].value.eventID,
+					recs[2].value.eventID,
+					4,5,6,7,8,9,
+					recs[3].value.eventID
+				]);
 			}
 		);
 	});

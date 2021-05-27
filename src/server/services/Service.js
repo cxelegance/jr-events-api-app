@@ -47,6 +47,9 @@ export default class Service {
 	/** @type {Number} The next ID to use when creating a new record. */
 	#nextId;
 
+	/** @type {Boolean} True for soft deletion, i.e., record is NULL, or false for real deletion. */
+	isSoftDelete;
+
 	/**
 	 * @param {ModelFactory}  modelFactory   For setting the internal property of the same name.
 	 * @param {Object}        db             For setting the internal property of the same name.
@@ -61,6 +64,7 @@ export default class Service {
 		this.#isSecure = isSecure;
 		this.secureMethods = [];
 		this.allMethods = ['options'];
+		this.isSoftDelete = false;
 	}
 
 	/**
@@ -92,6 +96,11 @@ export default class Service {
 			);
 		}else{
 			return this.modelFactory.get(this.modelType, this.db, this.version).then(
+				model => {
+					model.setSoftDelete(this.isSoftDelete);
+					return model;
+				}
+			).then(
 				model => this.#model = model
 			); // do not catch here! Let consumer catch instead.
 		}
@@ -162,7 +171,9 @@ export default class Service {
 				}else{
 					let out;
 					try{
-						out = records.map(rec => new recClass(rec))
+						out = records.map(
+							rec => this.isSoftDelete && rec === null ? null : new recClass(rec)
+						)
 					}catch(recordTypeError){
 						reject(recordTypeError)
 					}
@@ -314,6 +325,52 @@ export default class Service {
 	 */
 	testingOnlyMethodOnTheParentService({serviceRoute}){
 		return noSuchMethod('testingOnlyMethodOnTheParentService');
+	}
+
+	/**
+	 * Responsible for copying an array of records but filling any gaps in record IDs with NULL records;
+	 * intended for soft deletion only; intended for use during replacement of all records with user-supplied
+	 * records; you should call prepareRecords() first; a NULL record looks like {isNullStuffed: true, <recordID>};
+	 * the consumer can replace such a record with NULL and provide the record ID.
+	 *
+	 * @see prepareRecords()
+	 *
+	 * @param  {Record[]} records  Records that may or may not have non-contiguous record IDs within them.
+	 * @param  {String}   propName The name of the property that holds the index/key for records.
+	 *
+	 * @return {Record[]} A new array that has all records from input array plus any NULL records that were necessary.
+	 */
+	nullStuffRecords(records, propName){
+		if(!this.isSoftDelete) throw new Error('do not nullStuffRecords() when not soft deleting.');
+		const out = [];
+		let lastId = 0;
+		while(records.length){
+			const rec = records.shift(); //rec is either NULL, or a proper record with ID
+			const isNullStuffed = true;
+			let extraRec;
+
+			if(rec === null){
+				rec = {isNullStuffed};
+				rec[propName] = lastId + 1;
+			}
+
+			// lastId is either 0 or 1; 0 if rec is real, 1 if rec is null
+
+			// now rec[propName] has either the current sequential ID, or one more advanced/ahead
+			// lastId is either one less than rec[propName], or two/many less
+			// we can loop, stuffing sequential nulls and incrementing lastId until lastId is one less than rec[propName]
+			// then push rec with its current sequential ID and the outer loop is finished another iteration
+
+			while(rec[propName] - lastId > 1){
+				extraRec = {isNullStuffed};
+				extraRec[propName] = ++lastId;
+				out.push(extraRec);
+			}
+
+			out.push(rec);
+			lastId = rec[propName];
+		}
+		return out;
 	}
 
 }
