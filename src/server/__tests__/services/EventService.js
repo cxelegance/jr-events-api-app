@@ -78,7 +78,7 @@ describe('get method', () => {
 	});
 
 	test('returns SuccessServiceResponse with record', () => {
-		const recs = [{key: 1, val: eventRecsValid.get(1)}];
+		const recs = [{key: 1, value: eventRecsValid.get(1)}];
 		return eventService.getModel().then(
 			eventsModel => new Promise( resolve => resolve(eventsModel.db.getRangeReturns(recs)) )
 		).then(
@@ -92,7 +92,7 @@ describe('get method', () => {
 	});
 
 	test('returns SuccessServiceResponse with record even when isSecure is false', () => {
-		const recs = [{key: 1, val: eventRecsValid.get(1)}];
+		const recs = [{key: 1, value: eventRecsValid.get(1)}];
 		return eventServiceInsecure.getModel().then(
 			eventsModel => new Promise( resolve => resolve(eventsModel.db.getRangeReturns(recs)) )
 		).then(
@@ -192,7 +192,7 @@ describe.only('post method', () => {
 
 	let recs;
 	beforeEach(() => {
-		recs = [{key: 1, val: eventRecsValid.get(1)}, {key: 2, val: eventRecsValid.get(2)}];
+		recs = [{key: 1, value: {...eventRecsValid.get(1)}}, {key: 2, value: {...eventRecsValid.get(2)}}];
 	});
 
 	test('returns InsecureOperationError when isSecure is false', () => {
@@ -269,13 +269,13 @@ describe.only('post method', () => {
 			eventsModel => new Promise(
 				resolve => {
 					eventsModel.db.getReturns(true)
-					eventsModel.db.getRangeReturns(recs)
+					eventsModel.db.getRangeReturns([recs[0]])
 					resolve();
 				}
 			)
 		).then(
 			() => {
-				const recNoID = eventRecsValid.get(3);
+				const recNoID = {...eventRecsValid.get(3)};
 				delete recNoID.eventID;
 				return eventService.post({ records: [recNoID] })
 			}
@@ -288,25 +288,24 @@ describe.only('post method', () => {
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);
-				expect(response.error.toString()).toBe('Error: trouble saving with newly created ID: 1.');
+				expect(response.error.toString()).toBe(`Error: trouble saving with newly created ID: ${recs[0].value.eventID + 1}.`);
 				return expect(response.error).toBeInstanceOf(Error);
 			}
 		);
 	});
 
 	test('returns ErrorServiceResponse with Error when RecordDeletedError is caught', () => {
-		eventService.isSoftDelete = true;
 		return eventService.getModel().then(
 			eventsModel => new Promise(
 				resolve => {
 					eventsModel.db.getReturns(null)
-					eventsModel.db.getRangeReturns(recs)
+					eventsModel.db.getRangeReturns([recs[0]])
 					resolve();
 				}
 			)
 		).then(
 			() => {
-				const recNoID = eventRecsValid.get(3);
+				const recNoID = {...eventRecsValid.get(3)};
 				delete recNoID.eventID;
 				return eventService.post({ records: [recNoID] })
 			}
@@ -319,7 +318,7 @@ describe.only('post method', () => {
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);
-				expect(response.error.toString()).toBe('Error: Soft deleted: trouble saving with newly created ID: 1.');
+				expect(response.error.toString()).toBe(`Error: Soft deleted: trouble saving with newly created ID: ${recs[0].value.eventID + 1}.`);
 				return expect(response.error).toBeInstanceOf(Error);
 			}
 		);
@@ -330,7 +329,7 @@ describe.only('post method', () => {
 			eventsModel => new Promise(
 				resolve => {
 					eventsModel.db.getReturns(undefined);
-					eventsModel.db.getRangeReturns(recs);
+					eventsModel.db.getRangeReturns([recs[0]]);
 					eventsModel.db.putResolves(false);
 					resolve();
 				}
@@ -346,7 +345,7 @@ describe.only('post method', () => {
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);
-				expect (response.error.toString()).toBe('Error: Database failed to create record with id 1');
+				expect (response.error.toString()).toBe(`Error: Database failed to create record with id ${recs[0].value.eventID + 1}`);
 				return expect(response.error).toBeInstanceOf(Error);
 			}
 		);
@@ -357,13 +356,13 @@ describe.only('post method', () => {
 			eventsModel => new Promise(
 				resolve => {
 					eventsModel.db.getReturns(undefined);
-					eventsModel.db.getRangeReturns(recs);
+					eventsModel.db.getRangeReturns([recs[0]]);
 					eventsModel.db.putResolves(true);
 					resolve();
 				}
 			)
 		).then(
-			() => eventService.post({ records: [eventRecsValid.get(3)] })
+			() => eventService.post({ records: [{...eventRecsValid.get(3)}] })
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(ErrorServiceResponse);
@@ -373,7 +372,7 @@ describe.only('post method', () => {
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(SuccessServiceResponse);
-				return expect(response.data).toBe(1);
+				return expect(response.data).toBe(recs[0].value.eventID + 1);
 			}
 		);
 	});
@@ -384,7 +383,7 @@ describe('delete method', () => {
 
 	let recs;
 	beforeEach(() => {
-		recs = [{key: 1, val: eventRecsValid.get(1)}, {key: 2, val: eventRecsValid.get(2)}];
+		recs = [{key: 1, value: eventRecsValid.get(1)}, {key: 2, value: eventRecsValid.get(2)}];
 	});
 
 	test('returns InsecureOperationError when isSecure is false', () => {

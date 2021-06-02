@@ -1,5 +1,7 @@
 import Service from './Service';
 import EventsRecord from '../records/EventsRecord';
+import RecordDeletedError from '../errors/RecordDeletedError';
+import NoRecordsFoundError from '../errors/NoRecordsFoundError';
 
 /**
  * Responsible for defining the EventsService.
@@ -39,6 +41,14 @@ export default class EventsService extends Service { // FINAL
 			() => this.getModel()
 		).then(
 			model => model.read(start ? start : 1, end)
+		).catch(
+			e => {
+				if(e instanceof RecordDeletedError){
+					throw new NoRecordsFoundError(`No records found for start = ${start} and end = ${end}.`);
+				}else{
+					throw e;
+				}
+			}
 		).then(
 			data => this.generateSuccess('get', data, {start, end})
 		).catch(
@@ -47,7 +57,9 @@ export default class EventsService extends Service { // FINAL
 	}
 
 	/**
-	 * Responsible for replacing all EventsRecords with a supplied set of records with record ids.
+	 * Responsible for replacing all EventsRecords with a supplied set of records with record ids; if isSoftDelete,
+	 * then any null records provided will be given a record ID and considered soft deleted, and any gaps in
+	 * record IDs will also be given a record ID and considered soft deleted.
 	 *
 	 * @param  {Object}         p         Params are wrapped in this object.
 	 * @param  {EventsRecord[]} p.records An EventsRecord with proposed fields/values, wrapped in an array.
@@ -84,6 +96,7 @@ export default class EventsService extends Service { // FINAL
 						records.forEach(
 							rec => allPromises.push(model.create( rec.isNullStuffed ? null : rec, rec.eventID ))
 						);
+						this.setNextId(0); // force recalculation
 						return Promise.all(allPromises);
 					}
 				).then(

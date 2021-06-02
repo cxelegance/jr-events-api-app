@@ -85,7 +85,7 @@ export default class Model {
 		return new Promise(
 			(resolve, reject) => {
 				this.db.getRange(
-					{start, end: inclusiveEnd || end}
+					{start, end: inclusiveEnd}
 				).filter(
 					({key, value}) => {
 						hasEncounteredNull = hasEncounteredNull || (this.#isSoftDelete && value === null);
@@ -94,7 +94,7 @@ export default class Model {
 				).forEach(
 					({value}) => out.push(value)
 				);
-				if(!out.length && !end && hasEncounteredNull){
+				if(!out.length && inclusiveEnd && inclusiveEnd - start === 1 && hasEncounteredNull){
 					reject(new RecordDeletedError(`Record has been soft deleted; id: ${start}.`));
 				}else if(!out.length){
 					reject(new NoRecordsFoundError(`No records found for start = ${start} and end = ${end}.`));
@@ -191,6 +191,37 @@ export default class Model {
 	 */
 	getSoftDelete(){
 		return this.#isSoftDelete;
+	}
+
+	/**
+	 * Responsible for getting the most recent/top record from the database.
+	 *
+	 * @return {Promise} Resolves with Records[] (only one record); rejects with NoRecordsFoundError or
+	 *                   RecordDeletedError (in the latter case, error.message == '<key of soft-deleted record>'
+	 */
+	getMostRecent(){
+		return new Promise(
+			(resolve, reject) => {
+				const out = [];
+				this.db.getRange(
+					{reverse: true, limit: 1}
+				).forEach(
+					({key, value}) => {
+						if(this.#isSoftDelete && value === null) out.push(key)
+						else out.push(value);
+					}
+				);
+				if(!out.length){
+					reject(new NoRecordsFoundError(`Cannot get most recent record; no records found.`));
+				}else if(out.length > 1){
+					reject(new Error('getMostRecent would return more than one record.'));
+				}else if(this.#isSoftDelete && typeof out[0] == 'number'){
+					reject(new RecordDeletedError('' + out[0]));
+				}else{
+					resolve(out);
+				}
+			}
+		);
 	}
 }
 

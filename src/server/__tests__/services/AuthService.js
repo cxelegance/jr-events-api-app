@@ -94,7 +94,7 @@ describe('get method', () => {
 	});
 
 	test('returns SuccessServiceResponse with record when searching by userID', () => {
-		const recs = [{key: 1, value: authRecsValid.get(1)}];
+		const recs = [{key: 1, value: {...authRecsValid.get(1)}}];
 		recs[0].value.createdAt = Date.now();
 		return authService.getModel().then(
 			authModel => new Promise( resolve => resolve(authModel.db.getRangeReturns(recs)) )
@@ -103,13 +103,13 @@ describe('get method', () => {
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(SuccessServiceResponse);
-				return expect(response.data).toEqual([authRecsValid.get(1)]);
+				return expect(response.data).toEqual([recs[0].value]);
 			}
 		);
 	});
 
 	test('returns SuccessServiceResponse with record when searching by authToken', () => {
-		const recs = [{key: 1, value: authRecsValid.get(1)}];
+		const recs = [{key: 1, value: {...authRecsValid.get(1)}}];
 		recs[0].value.createdAt = Date.now();
 		return authService.getModel().then(
 			authModel => new Promise( resolve => resolve(authModel.db.getRangeReturns(recs)) )
@@ -118,13 +118,13 @@ describe('get method', () => {
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(SuccessServiceResponse);
-				return expect(response.data).toEqual([authRecsValid.get(1)]);
+				return expect(response.data).toEqual([recs[0].value]);
 			}
 		);
 	});
 
 	test('returns SuccessServiceResponse with record even when isSecure is false', () => {
-		const recs = [{key: 1, value: authRecsValid.get(1)}];
+		const recs = [{key: 1, value: {...authRecsValid.get(1)}}];
 		recs[0].value.createdAt = Date.now();
 		return authServiceInsecure.getModel().then(
 			authModel => new Promise( resolve => resolve(authModel.db.getRangeReturns(recs)) )
@@ -133,13 +133,13 @@ describe('get method', () => {
 		).then(
 			response => {
 				expect(response).toBeInstanceOf(SuccessServiceResponse);
-				return expect(response.data).toEqual([authRecsValid.get(1)]);
+				return expect(response.data).toEqual([recs[0].value]);
 			}
 		);
 	});
 
 	test('returns ErrorServiceResponse with ReauthenticationRequiredError', () => {
-		const recs = [{key: 1, value: authRecsValid.get(1)}];
+		const recs = [{key: 1, value: {...authRecsValid.get(1)}}];
 		return authService.getModel().then(
 			authModel => new Promise( resolve => resolve(authModel.db.getRangeReturns(recs)) )
 		).then(
@@ -160,7 +160,7 @@ describe('post method', () => {
 
 	let recs;
 	beforeEach(() => {
-		recs = [{key: 1, value: authRecsValid.get(1)}, {key: 2, value: authRecsValid.get(2)}];
+		recs = [{key: 1, value: {...authRecsValid.get(1)}}, {key: 2, value: {...authRecsValid.get(2)}}];
 	});
 
 	test('returns InsecureOperationError when isSecure is false', () => {
@@ -187,7 +187,7 @@ describe('post method', () => {
 			authModel => new Promise(
 				resolve => {
 					authModel.db.getReturns(true)
-					authModel.db.getRangeReturns(recs)
+					authModel.db.getRangeReturns([recs[0]])
 					resolve();
 				}
 			)
@@ -226,7 +226,7 @@ describe('post method', () => {
 			authModel => new Promise(
 				resolve => {
 					authModel.db.getReturns(undefined);
-					authModel.db.getRangeReturns(recs);
+					authModel.db.getRangeReturns([recs[0]]);
 					authModel.db.putResolves(true);
 					resolve();
 				}
@@ -237,7 +237,7 @@ describe('post method', () => {
 			response => {
 				expect(response).toBeInstanceOf(SuccessServiceResponse);
 				expect(response.data.authToken).toEqual(expect.stringMatching(/^\w*$/gm));
-				return expect(response.data.id).toBe(3);
+				return expect(response.data.id).toBe(recs[0].value.authID + 1);
 
 			}
 		);
@@ -269,7 +269,7 @@ describe('delete method', () => {
 
 	let recs;
 	beforeEach(() => {
-		recs = [{key: 1, value: authRecsValid.get(1)}, {key: 2, value: authRecsValid.get(2)}];
+		recs = [{key: 1, value: {...authRecsValid.get(1)}}, {key: 2, value: {...authRecsValid.get(2)}}];
 	});
 
 	test('returns ErrorServiceResponse with NoRecordsFoundError', () => {

@@ -39,7 +39,7 @@ beforeEach(() => {
 			controllerFactory = new ControllerFactory(serviceFactory, serviceToAPIResponseMap);
 			if(!(controllerFactory instanceof ControllerFactory)) throw new Error('bad controllerFactory');
 			httpServer = new HTTPServer(port, routes, controllerFactory);
-			// httpServer.log.level('trace');
+			httpServer.log.level('trace');
 		}
 	).then(
 		() => httpServer.listen()
@@ -183,7 +183,7 @@ describe('HTTPServer returns all expected APIResponses for /api/auth', () => {
 		const encString = btoa(`${masterUserID}:${masterClearword}`);
 		const recs = [{key: 1, value: authRecsValid.get(1)}, {key: 2, value: authRecsValid.get(2)}];
 		db.getReturns(true);
-		db.getRangeReturns(recs);
+		db.getRangeReturns([recs[1]]);
 		httpServer.setFakeSecure(true);
 		return frisby.setup({
 			request: {
@@ -202,11 +202,11 @@ describe('HTTPServer returns all expected APIResponses for /api/auth', () => {
 		).expectNot(
 			'json', 'status', 'No Content'
 		).expectNot(
-			'header', 'Allow', 'POST'
+			'header', 'Allow', Joi.any()
 		).expectNot(
-			'json', 'links', []
+			'json', 'links', Joi.any()
 		).expectNot(
-			'json', 'message', 'RecordExistsError: A record already exists with id 3.'
+			'json', 'message', Joi.any()
 		).expectNot(
 			'json', 'data', Joi.any()
 		);
@@ -225,7 +225,7 @@ describe('HTTPServer returns all expected APIResponses for /api/auth', () => {
 			}
 		}).post(`${baseURI}/api/auth`).expect(
 			'header', 'URI', '/api/auth'
-		).expect(
+		).inspectResponse().expect(
 			'header', 'Content-Type', 'application/json; charset=UTF-8'
 		).expect(
 			'status', 500
@@ -248,7 +248,7 @@ describe('HTTPServer returns all expected APIResponses for /api/auth', () => {
 		const encString = btoa(`${masterUserID}:${masterClearword}`);
 		const recs = [{key: 1, value: authRecsValid.get(1)}, {key: 2, value: authRecsValid.get(2)}];
 		db.getReturns(undefined);
-		db.getRangeReturns(recs);
+		db.getRangeReturns([recs[1]]);
 		db.putResolves(true);
 		httpServer.setFakeSecure(true);
 		return frisby.setup({

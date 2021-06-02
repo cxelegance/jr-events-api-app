@@ -8,10 +8,16 @@ End process when you're done.<br>
 If you wanna clean up:<br>
 **yarn run clean**
 
-## Database Model and Choice
+## Database
+### Record IDs and Soft Deletion
+The next available record ID (numeric, starting at 1) is determined from looking at the newest record (most recently added) in the database (and adding one to it). Soft deletion is turned on (see [EventsService](src/server/services/EventsService.js#L23) and [EventService](src/server/services/EventService.js#L26)), thus record IDs will remain after records are deleted; this is useful for the API to respond with 410 Gone.
+
+GET /api/events/ will return all records minus any soft-deleted records; this means there may be some record IDs missing in the results. However, these exact results could be returned to the database—i.e., database restore—via PUT /api/events. Any gaps in event IDs will be saved in the database as NULL records. One can also add NULL records to the collection that is sent to /api/events; this is useful for indicating soft-deleted records that come after the most recent, actual record. Such activity is tested in [test/server.js](src/server/__tests__/server.js#L446).
+
+### Model and Choice
 Ultimately, it was decided to use LMDB; LevelDB was considered but the prior appears more resistant to data corruption.
 
-### Criteria for Decision
+#### Criteria for Decision
 - This app is intended to be hosted at Heroku on a free account.
 - PostgreSQL appears to have some expected downtime at this account level, on the order of 1 hour per month.
 - There also will be need to upgrade the PostgreSQL database every three years or so.

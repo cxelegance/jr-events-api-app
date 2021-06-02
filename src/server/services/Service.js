@@ -5,6 +5,7 @@ import ConfirmAuthorizationError from '../errors/ConfirmAuthorizationError';
 import NoSuchMethodTypeError from '../errors/NoSuchMethodTypeError';
 import RecordTypeError from '../errors/RecordTypeError';
 import NoRecordsFoundError from '../errors/NoRecordsFoundError';
+import RecordDeletedError from '../errors/RecordDeletedError';
 
 /**
  * Responsible for abstractly defining a Service; an inheriting class must make only its public-facing methods public—all else should be private;
@@ -123,16 +124,21 @@ export default class Service {
 			resolve => resolve(this.#nextId)
 		);
 		else return this.getModel().then(
-			model => model.read(1, undefined)
+			model => model.getMostRecent()
 		).catch(
 			e => {
-				if(!(e instanceof NoRecordsFoundError)) throw e;
-				else return [];
+				if(e instanceof NoRecordsFoundError) return [dummyLastRec];
+				if(e instanceof RecordDeletedError){
+					dummyLastRec[propName] = parseInt(e.message, 10);
+					if(typeof dummyLastRec[propName] != 'number' || isNaN(dummyLastRec[propName])){
+						throw new Error(`RecordDeletedError did not return soft-deleted key as expected; got ${e.message}`);
+					}
+					return [dummyLastRec];
+				}
+				else throw e;
 			}
 		).then(
-			records => records.pop() || dummyLastRec
-		).then(
-			lastRec => lastRec[propName] + 1
+			([lastRec]) => lastRec[propName] + 1
 		); // do not catch here! Let consumer catch instead.
 	}
 
@@ -141,7 +147,7 @@ export default class Service {
 	 *
 	 * @see #nextId
 	 *
-	 * @param {Number} id The nextId for creating records.
+	 * @param {Number} id The nextId for creating records; setting to zero forces a recalculation on next getNextId() call.
 	 *
 	 * @throws TypeError
 	 *
