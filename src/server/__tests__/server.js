@@ -86,7 +86,7 @@ afterAll(() => {
 	);
 });
 
-describe('basic process for authenticating and getting/modifying events works', () => {
+describe('basic process for authenticating and getting/modifying/deleting events works', () => {
 
 	let authToken, bearerString;
 
@@ -425,7 +425,7 @@ describe('basic process for authenticating and getting/modifying events works', 
 		);
 	});
 
-	test('GET events returns 200 empty', () => {
+	test('GET events returns 200 empty after deleting', () => {
 		return frisby.get(`${baseURI}/api/events`).expect(
 			'header', 'URI', '/api/events'
 		).expect(
@@ -443,7 +443,7 @@ describe('basic process for authenticating and getting/modifying events works', 
 		);
 	});
 
-	test('POST event to preload for upcoming test of PUT events/', () => {
+	test('POST event to preload for upcoming test of PUT (overwrite) events/', () => {
 		const recs = [
 			{key: 1, value: eventRecsValid.get(1)}
 		];
@@ -470,7 +470,7 @@ describe('basic process for authenticating and getting/modifying events works', 
 		).expectNot(
 			'json', 'message', Joi.any()
 		).expect(
-			'json', 'data', 1
+			'json', 'data', 3 // 1 and 2 were soft deleted
 		);
 	});
 
@@ -496,9 +496,11 @@ describe('basic process for authenticating and getting/modifying events works', 
 				"displayName": Joi.string()
 			}
 		).expect(
-			'json', 'data[0].eventID', 1
+			'json', 'data[0].eventID', 3
 		).expect(
 			'json', 'data[0].displayName', recs[0].value.displayName
+		).expectNot(
+			'jsonTypes', 'data[1]', Joi.any()
 		);
 	});
 
@@ -531,13 +533,27 @@ describe('basic process for authenticating and getting/modifying events works', 
 		).expectNot(
 			'json', 'message', Joi.any()
 		).expect(
-			'json', 'data[0]', recs[0].value.eventID
+			'json', 'data[0]', 1
 		).expect(
-			'json', 'data[1]', recs[1].value.eventID
+			'json', 'data[1]', recs[0].value.eventID
 		).expect(
-			'json', 'data[2]', recs[2].value.eventID
+			'json', 'data[2]', recs[1].value.eventID
+		).expect(
+			'json', 'data[3]', 4
+		).expect(
+			'json', 'data[4]', 5
+		).expect(
+			'json', 'data[5]', 6
+		).expect(
+			'json', 'data[6]', 7
+		).expect(
+			'json', 'data[7]', 8
+		).expect(
+			'json', 'data[8]', 9
+		).expect(
+			'json', 'data[9]', recs[2].value.eventID
 		).expectNot(
-			'jsonTypes', 'data[3]', Joi.any()
+			'jsonTypes', 'data[10]', Joi.any()
 		);
 	});
 
@@ -586,6 +602,444 @@ describe('basic process for authenticating and getting/modifying events works', 
 			'json', 'data[2].eventID', recs[2].value.eventID
 		).expect(
 			'json', 'data[2].displayName', recs[2].value.displayName
+		).expectNot(
+			'json', 'data[3]', Joi.any()
+		);
+	});
+
+	test('PUT events to init for the next tests regarding deletions', () => {
+		const recs = [
+			{key: 1, value: eventRecsValid.get(1)},
+			{key: 2, value: eventRecsValid.get(2)},
+			{key: 3, value: eventRecsValid.get(3)},
+			{key: 4, value: eventRecsValid.get(4)},
+		];
+		return frisby.setup({
+			request: {
+				headers: {
+					"Authorization": `Bearer ${bearerString}`,
+					"Content-Type": 'application/json; charset=utf-8'
+				}
+			}
+		}).put(
+			`${baseURI}/api/events`,
+			recs.map(rec => rec.value)
+		).expect(
+			'header', 'URI', '/api/events'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 200
+		).expect(
+			'json', 'code', 200
+		).expect(
+			'json', 'status', 'OK'
+		).expectNot(
+			'json', 'message', Joi.any()
+		).expect(
+			'json', 'data[0]', recs[0].value.eventID
+		).expect(
+			'json', 'data[1]', recs[1].value.eventID
+		).expect(
+			'json', 'data[2]', recs[2].value.eventID
+		).expect(
+			'json', 'data[3]', 4
+		).expect(
+			'json', 'data[4]', 5
+		).expect(
+			'json', 'data[5]', 6
+		).expect(
+			'json', 'data[6]', 7
+		).expect(
+			'json', 'data[7]', 8
+		).expect(
+			'json', 'data[8]', 9
+		).expect(
+			'json', 'data[9]', recs[3].value.eventID
+		).expectNot(
+			'jsonTypes', 'data[10]', Joi.any()
+		);
+	});
+
+	test('GET /event/11 returns 404', () => {
+		return frisby.get(`${baseURI}/api/event/11`).expect(
+			'header', 'URI', '/api/event'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 404
+		).expect(
+			'json', 'code', 404
+		).expect(
+			'json', 'status', 'Not Found'
+		);
+	});
+
+	test('GET /event/9 returns 410', () => {
+		return frisby.get(`${baseURI}/api/event/9`).expect(
+			'header', 'URI', '/api/event'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 410
+		).expect(
+			'json', 'code', 410
+		).expect(
+			'json', 'status', 'Gone'
+		).expectNot(
+			'json', 'message', Joi.any()
+		);
+	});
+
+	test('GET /event/4 returns 410', () => {
+		return frisby.get(`${baseURI}/api/event/4`).expect(
+			'header', 'URI', '/api/event'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 410
+		).expect(
+			'json', 'code', 410
+		).expect(
+			'json', 'status', 'Gone'
+		).expectNot(
+			'json', 'message', Joi.any()
+		);
+	});
+
+	test('PUT /event/4 returns 404', () => {
+		return frisby.setup({
+			request: {
+				headers: {
+					"Authorization": `Bearer ${bearerString}`,
+					"Content-Type": 'application/json; charset=utf-8'
+				}
+			}
+		}).put(
+			`${baseURI}/api/event/4`,
+			[eventRecsValid.get(1)]
+		).expect(
+			'header', 'URI', '/api/event'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 404
+		).expect(
+			'json', 'code', 404
+		).expect(
+			'json', 'status', 'Not Found'
+		);
+	});
+
+	test('GET /events/ returns exactly what we PUT to init the db', () => {
+		const recs = [
+			{key: 1, value: eventRecsValid.get(1)},
+			{key: 2, value: eventRecsValid.get(2)},
+			{key: 3, value: eventRecsValid.get(3)},
+			{key: 4, value: eventRecsValid.get(4)},
+		];
+		return frisby.get(
+			`${baseURI}/api/events`
+		).expect(
+			'header', 'URI', '/api/events'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 200
+		).expect(
+			'json', 'code', 200
+		).expect(
+			'json', 'status', 'OK'
+		).expectNot(
+			'json', 'message', Joi.any()
+		).expect(
+			'json', 'data[0].eventID', recs[0].value.eventID
+		).expect(
+			'json', 'data[1].eventID', recs[1].value.eventID
+		).expect(
+			'json', 'data[2].eventID', recs[2].value.eventID
+		).expect(
+			'json', 'data[3].eventID', recs[3].value.eventID
+		).expectNot(
+			'jsonTypes', 'data[4]', Joi.any()
+		);
+	});
+
+	test('DELETE event/2 returns 204 No Content; will try a GET afterward', () => {
+		return frisby.setup({
+			request: {
+				headers: {
+					"Authorization": `Bearer ${bearerString}`,
+					"Content-Type": 'application/json; charset=utf-8'
+				}
+			}
+		}).delete(
+			`${baseURI}/api/event/2`
+		).expect(
+			'header', 'URI', '/api/event'
+		).expectNot(
+			'header', 'Content-Type', Joi.any()
+		).expect(
+			'status', 204
+		);
+	});
+
+	test('GET /event/2 returns 410', () => {
+		return frisby.get(`${baseURI}/api/event/2`).expect(
+			'header', 'URI', '/api/event'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 410
+		).expect(
+			'json', 'code', 410
+		).expect(
+			'json', 'status', 'Gone'
+		).expectNot(
+			'json', 'message', Joi.any()
+		);
+	});
+
+	test('DELETE event/3 for the next tests', () => {
+		return frisby.setup({
+			request: {
+				headers: {
+					"Authorization": `Bearer ${bearerString}`,
+					"Content-Type": 'application/json; charset=utf-8'
+				}
+			}
+		}).delete(
+			`${baseURI}/api/event/3`
+		).expect(
+			'header', 'URI', '/api/event'
+		).expectNot(
+			'header', 'Content-Type', Joi.any()
+		).expect(
+			'status', 204
+		);
+	});
+
+	test('DELETE event/10 for the next tests', () => {
+		return frisby.setup({
+			request: {
+				headers: {
+					"Authorization": `Bearer ${bearerString}`,
+					"Content-Type": 'application/json; charset=utf-8'
+				}
+			}
+		}).delete(
+			`${baseURI}/api/event/10`
+		).expect(
+			'header', 'URI', '/api/event'
+		).expectNot(
+			'header', 'Content-Type', Joi.any()
+		).expect(
+			'status', 204
+		);
+	});
+
+	test('GET /event/10 returns 410', () => {
+		return frisby.get(`${baseURI}/api/event/10`).expect(
+			'header', 'URI', '/api/event'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 410
+		).expect(
+			'json', 'code', 410
+		).expect(
+			'json', 'status', 'Gone'
+		).expectNot(
+			'json', 'message', Joi.any()
+		);
+	});
+
+	test('POST /event/ returns 201, a new event which we will next delete', () => {
+		return frisby.setup({
+			request: {
+				headers: {
+					"Authorization": `Bearer ${bearerString}`,
+					"Content-Type": 'application/json; charset=utf-8'
+				}
+			}
+		}).post(
+			`${baseURI}/api/event/`,
+			[eventRecsValid.get(1)]
+		).expect(
+			'header', 'URI', '/api/event'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 201
+		).expect(
+			'json', 'code', 201
+		).expect(
+			'json', 'status', 'Created'
+		).expect(
+			'json', 'data', 11
+		);
+	});
+
+	test('GET /event/11 returns 200 to confirm previous POST', () => {
+		const rec = {...eventRecsValid.get(1)};
+		rec.eventID = 11;
+		return frisby.get(`${baseURI}/api/event/11`).expect(
+			'header', 'URI', '/api/event'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 200
+		).expect(
+			'json', 'code', 200
+		).expect(
+			'json', 'status', 'OK'
+		).expect(
+			'json', 'data[0].eventID', rec.eventID
+		).expect(
+			'json', 'data[0].displayName', rec.displayName
+		).expect(
+			'json', 'data[0].description', rec.description
+		);
+	});
+
+	test('DELETE event/11 for the next tests', () => {
+		return frisby.setup({
+			request: {
+				headers: {
+					"Authorization": `Bearer ${bearerString}`,
+					"Content-Type": 'application/json; charset=utf-8'
+				}
+			}
+		}).delete(
+			`${baseURI}/api/event/11`
+		).expect(
+			'header', 'URI', '/api/event'
+		).expectNot(
+			'header', 'Content-Type', Joi.any()
+		).expect(
+			'status', 204
+		);
+	});
+
+	test('PUT /event/11 returns 404, it has been deleted', () => {
+		return frisby.setup({
+			request: {
+				headers: {
+					"Authorization": `Bearer ${bearerString}`,
+					"Content-Type": 'application/json; charset=utf-8'
+				}
+			}
+		}).put(
+			`${baseURI}/api/event/11`,
+			[eventRecsValid.get(1)]
+		).expect(
+			'header', 'URI', '/api/event'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 404
+		).expect(
+			'json', 'code', 404
+		).expect(
+			'json', 'status', 'Not Found'
+		).expectNot(
+			'json', 'data', Joi.any()
+		);
+	});
+
+	test('PUT events with NULL records to init for the next tests', () => {
+		const rec5 = {...eventRecsValid.get(4)};
+		rec5.eventID = 5;
+		const recs = [
+			eventRecsValid.get(1),
+			eventRecsValid.get(2),
+			eventRecsValid.get(3),
+			null,
+			rec5,
+			null
+		];
+		return frisby.setup({
+			request: {
+				headers: {
+					"Authorization": `Bearer ${bearerString}`,
+					"Content-Type": 'application/json; charset=utf-8'
+				}
+			}
+		}).put(
+			`${baseURI}/api/events`,
+			recs.map(rec => rec)
+		).expect(
+			'header', 'URI', '/api/events'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 200
+		).expect(
+			'json', 'code', 200
+		).expect(
+			'json', 'status', 'OK'
+		).expectNot(
+			'json', 'message', Joi.any()
+		).expect(
+			'json', 'data[0]', recs[0].eventID
+		).expect(
+			'json', 'data[1]', recs[1].eventID
+		).expect(
+			'json', 'data[2]', recs[2].eventID
+		).expect(
+			'json', 'data[3]', 4
+		).expect(
+			'json', 'data[4]', recs[4].eventID
+		).expect(
+			'json', 'data[5]', 6
+		).expectNot(
+			'jsonTypes', 'data[6]', Joi.any()
+		);
+	});
+
+	test('GET /event/4 returns 410 because it was input as a NULL', () => {
+		return frisby.get(`${baseURI}/api/event/4`).expect(
+			'header', 'URI', '/api/event'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 410
+		).expect(
+			'json', 'code', 410
+		).expect(
+			'json', 'status', 'Gone'
+		).expectNot(
+			'json', 'message', Joi.any()
+		);
+	});
+
+	test('GET /event/6 returns 410 because it was input as a NULL', () => {
+		return frisby.get(`${baseURI}/api/event/6`).expect(
+			'header', 'URI', '/api/event'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 410
+		).expect(
+			'json', 'code', 410
+		).expect(
+			'json', 'status', 'Gone'
+		).expectNot(
+			'json', 'message', Joi.any()
+		);
+	});
+
+	test('GET /event/7 returns 404 because it the last NULL was 6', () => {
+		return frisby.get(`${baseURI}/api/event/7`).expect(
+			'header', 'URI', '/api/event'
+		).expect(
+			'header', 'Content-Type', 'application/json; charset=UTF-8'
+		).expect(
+			'status', 404
+		).expect(
+			'json', 'code', 404
+		).expect(
+			'json', 'status', 'Not Found'
 		);
 	});
 
