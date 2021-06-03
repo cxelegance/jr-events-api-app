@@ -27,7 +27,7 @@ import routes from '../apiRoutes';
 const freshLimit = 5 * 60 * 1000; // 5 minutes
 const masterUserID = "100";
 const masterClearword = 'hey just testing';
-const port = 3000;
+const port = 3001;
 
 let serviceFactory, serviceToAPIResponseMap, controllerFactory, httpServer, server, baseURI;
 
@@ -37,48 +37,69 @@ beforeEach(() => {
 			serviceFactory = new ServiceFactory(modelFactory, db, freshLimit, masterUserID, hashword);
 			serviceToAPIResponseMap = new ServiceToAPIResponseMap();
 			controllerFactory = new ControllerFactory(serviceFactory, serviceToAPIResponseMap);
-			if(!(controllerFactory instanceof ControllerFactory)) throw new Error('bad controllerFactory');
+			if(!(controllerFactory instanceof ControllerFactory)) console.log('bad controllerFactory!');
 			httpServer = new HTTPServer(port, routes, controllerFactory);
-			httpServer.log.level('trace');
+			httpServer.log.level('fatal');
 		}
 	).then(
 		() => httpServer.listen()
 	).then(
 		nodeServer => {
-			server = nodeServer;
-			//const {address, family, port} = server.address();
-			const {port} = server.address();
-			baseURI = `http://localhost:${port}`;
-			return expect(server).toBeInstanceOf(Server);
+			if(!(nodeServer instanceof Server)) console.log('nodeServer is NOT a Server!');
+			else{
+				server = nodeServer;
+				const {port} = server.address();
+				baseURI = `http://localhost:${port}`;
+			}
 		}
-	).catch(
-		e => expect(e).toBe('no error should be thrown')
 	);
 });
 
 afterEach(() => {
 	return new Promise(
-		(resolve, reject) => {
-			try{
-				server.close(() => resolve())
-				server = undefined;
-			}catch(e){
-				reject(e)
+		resolve => {
+			if(server){
+				server.close(
+					() => {
+						server = undefined;
+						baseURI = undefined;
+						resolve();
+					}
+				);
+			}else{
+				console.log('afterEach() found there was no server; be sure to return a promise from each test!');
+				resolve();
 			}
 		}
-	).catch(
-		e => expect(e).toBe('no error should be thrown')
 	);
 });
 
-test('HTTPServer instantiates correctly', () => {
+afterAll(() => {
+	return new Promise(
+		resolve => {
+			if(server) server.close(
+				() => {
+					console.log('WARNING: HTTPServer.js had to close after all tests');
+					resolve();
+				}
+			);
+			else{
+				console.log('HTTPServer.js was closed by its last test');
+				resolve();
+			}
+		}
+	);
+}, 10000);
+
+test('HTTPServer instantiates correctly', done => {
 	expect(httpServer).toBeInstanceOf(HTTPServer);
 	expect(httpServer.controllerFactory).toBeInstanceOf(ControllerFactory);
 	expect(httpServer.port).toBe(port);
 	expect(httpServer.routes).toEqual(routes);
+	done();
 });
 
-test('HTTPServer decipherCredentials() works correctly', () => {
+test('HTTPServer decipherCredentials() works correctly', done => {
 	expect(httpServer.decipherCredentials('Basic dXNlcjpwYXNz')).toEqual({user: 'user', pass: 'pass'});
 	expect(httpServer.decipherCredentials('dXNlcjpwYXNz')).toEqual({user: undefined, pass: undefined});
 	expect(httpServer.decipherCredentials('Basic anVzdFBhc3M=')).toEqual({user: undefined, pass: undefined});
@@ -96,6 +117,7 @@ test('HTTPServer decipherCredentials() works correctly', () => {
 	expect(httpServer.decipherCredentials('Basic b')).toEqual({user: undefined, pass: undefined});
 	expect(httpServer.decipherCredentials('Basic c')).toEqual({user: undefined, pass: undefined});
 	expect(httpServer.decipherCredentials('Basic Og==')).toEqual({user: '', pass: ''});
+	done();
 });
 
 describe('HTTPServer returns all expected APIResponses for /api/auth', () => {
@@ -225,7 +247,7 @@ describe('HTTPServer returns all expected APIResponses for /api/auth', () => {
 			}
 		}).post(`${baseURI}/api/auth`).expect(
 			'header', 'URI', '/api/auth'
-		).inspectResponse().expect(
+		).expect(
 			'header', 'Content-Type', 'application/json; charset=UTF-8'
 		).expect(
 			'status', 500
@@ -1788,14 +1810,3 @@ describe('HTTPServer replies with discoverability for unknown routes', () => {
 	});
 
 });
-
-	/*
-	 * First, look at all the ServiceResponses that come from each service route.
-	 *
-	 * Then, see how they are mapped to APIResponses, and decide:
-	 *    which status code should be present?
-	 *    which headers should be in each response?
-	 *       Every response should have Content-Type: application/json; charset=UTF-8
-	 *    which links should be in each response?
-	 * Test that we receive each one of those APIResponses and that all expected headers and links are there.
-	 */

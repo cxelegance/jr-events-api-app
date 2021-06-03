@@ -70,21 +70,23 @@ const baseURI = `http://localhost:${port}`;
 afterAll(() => {
 	const proc = exec('rm -fR database/');
 	return new Promise(
-		(resolve, reject) => {
+		resolve => {
 			proc.on('close', code => {
-				try{
-					server.close();
-					console.log('test server is closed now');
-					if(code !== 0) throw `received error code ${code}`;
-					resolve();
-				}catch(e){
-					console.log('caught error: ', e);
+				if(code !== 0) console.log(`attempted to remove database; received error code: ${code}`);
+				if(server){
+					server.close(
+						() => {
+							console.log('server.js test server is closed now');
+							resolve();
+						}
+					);
+				}else{
 					resolve();
 				}
 			});
 		}
 	);
-});
+}, 10000);
 
 describe('basic process for authenticating and getting/modifying/deleting events works', () => {
 
@@ -142,11 +144,6 @@ describe('basic process for authenticating and getting/modifying/deleting events
 				authToken = json.data.authToken;
 				bearerString = btoa(`${masterUserID}:${authToken}`);
 				return Promise.resolve(res);
-			}
-		).catch(
-			e => {
-				server.close()
-				throw e;
 			}
 		);
 	});
