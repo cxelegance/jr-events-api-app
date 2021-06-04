@@ -7,8 +7,17 @@ It is maintained in [Markdown](https://www.markdownguide.org/).
 
 ## [Unreleased]
 - implement (or ensure implemented) CORS for Express
-- POST /events/ accepts array of multiple records
-- POST or other method to replace all records with array of records
+
+## [0.4.0] - 2021-06-04
+### Added
+- introduced soft-deletion so that old resources can return 410 Gone
+- soft-deletion on for event/ and events/, but not for auth/
+- PUT events/ implemented: overwrites database contents (i.e. restore from backup)
+
+### Changed
+- Schema now validates primary key
+- next primary key ID is determined by Model::getMostRecent()
+- in soft-deletion mode, NULL records are accepted and stored, but not returned
 
 ## [0.3.0] - 2021-05-04
 ### Added
